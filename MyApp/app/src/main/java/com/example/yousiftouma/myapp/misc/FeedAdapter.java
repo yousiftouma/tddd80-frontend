@@ -1,0 +1,257 @@
+package com.example.yousiftouma.myapp.misc;
+
+import android.content.Context;
+import android.graphics.Color;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.TextView;
+
+import com.example.yousiftouma.myapp.R;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
+
+/**
+ * Populates feed
+ */
+public class FeedAdapter extends BaseAdapter {
+
+    private ArrayList<JSONObject> feedList;
+    private ArrayList<Integer> userLikes;
+    private LayoutInflater mInflater;
+    private Context context;
+    private JSONObject post;
+    private ViewHolder viewHolder;
+    private User mLoggedInUser = User.getInstance();
+
+    private OnCommentButtonClickedListener mListener;
+
+    public FeedAdapter(Context context, ArrayList<JSONObject> feedList, ArrayList<Integer> likes) {
+        super();
+        this.feedList = feedList;
+        this.mInflater = LayoutInflater.from(context);
+        this.userLikes = likes;
+        this.context = context;
+    }
+
+    @Override
+    public int getCount() {
+        return feedList.size();
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return feedList.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return 0;
+    }
+
+    private class ViewHolder {
+        TextView username;
+        TextView title;
+        TextView description;
+        TextView numberOfLikes;
+        TextView numberOfComments;
+        ImageButton buttonLike;
+        Button buttonComment;
+    }
+
+    @Override
+    public View getView(final int position, final View convertView, final ViewGroup parent) {
+
+        final View view;
+
+        if (convertView == null) {
+            view = mInflater.inflate(R.layout.feed_item_layout, parent, false);
+            viewHolder = new ViewHolder();
+            viewHolder.buttonLike = (ImageButton) view.findViewById(R.id.button_like);
+            viewHolder.buttonComment = (Button) view.findViewById(R.id.button_comment);
+            viewHolder.username = (TextView) view.findViewById(R.id.username);
+            viewHolder.title = (TextView) view.findViewById(R.id.title);
+            viewHolder.description = (TextView) view.findViewById(R.id.description);
+            viewHolder.numberOfLikes = (TextView) view.findViewById(R.id.likesView);
+            viewHolder.numberOfComments = (TextView) view.findViewById(R.id.commentsView);
+
+            view.setTag(viewHolder);
+        }
+
+        else {
+            view = convertView;
+            viewHolder = (ViewHolder) view.getTag();
+        }
+
+        /**
+         * Gets a JSON object containing a post, gets the data
+         * from every key and sets it to the corresponding TextView
+         */
+        post = feedList.get(position);
+        System.out.println("curr pos= " + position);
+        viewHolder.buttonLike.setTag(R.id.button_position_in_feed, position);
+        viewHolder.buttonComment.setTag(position);
+        try {
+            viewHolder.username.setText(post.getString("artist"));
+            viewHolder.title.setText(post.getString("title"));
+            viewHolder.description.setText(post.getString("description"));
+            viewHolder.numberOfLikes.setText(getNumberOfLikes(post.getInt("id")));
+            // if post is already liked
+            if (userLikes.contains(post.getInt("id"))){
+                viewHolder.buttonLike.setImageDrawable(context.getResources()
+                        .getDrawable(R.mipmap.liked_50));
+                viewHolder.buttonLike.setTag(R.id.like_status, "unlike");
+            }
+            // else post is not liked, our "default"
+            // (needed, otherwise buttons may be set wrongly)
+            else {
+                viewHolder.buttonLike.setImageDrawable(context.getResources()
+                    .getDrawable(R.mipmap.not_liked_50));
+                viewHolder.buttonLike.setTag(R.id.like_status, "like");
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            e.getMessage();
+        }
+
+        viewHolder.buttonLike.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int position = (Integer) v.getTag(R.id.button_position_in_feed);
+                String buttonStatus = (String) v.getTag(R.id.like_status);
+                doLikeOrUnlike(buttonStatus, position, (ImageButton) v);
+                updateUserLikes();
+                // run getView again for this particular row so it is updated
+                getView(position, view, parent);
+            }
+        });
+
+        viewHolder.buttonComment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int position = (Integer) v.getTag();
+                onCommentButtonClicked(position);
+
+            }
+        });
+
+        return view;
+    }
+
+    public interface OnCommentButtonClickedListener {
+        // TODO: Update argument type and name
+        public void onCommentClicked(int postId);
+    }
+
+    public void onCommentButtonClicked(int position) {
+        if (mListener != null) {
+            try {
+                mListener.onCommentClicked(feedList.get(position).getInt("id"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void doLikeOrUnlike(String buttonStatus, int pos, ImageButton button) {
+        String url;
+        String response = null;
+        String JsonString = createJsonForAction(pos);
+        System.out.println("comparison with equals: " + buttonStatus.equals("like"));
+
+
+        if (buttonStatus.equals("like") ) {
+            url = "http://mytestapp-youto814.openshift.ida.liu.se/like/";
+        }
+        else { // It says unlike and we do that
+            url = "http://mytestapp-youto814.openshift.ida.liu.se/unlike/";
+        }
+        try {
+            String responseJsonString = new DynamicAsyncTask(JsonString).execute(url).get();
+            System.out.println(responseJsonString);
+            JSONObject responseAsJson = new JSONObject(responseJsonString);
+            response = responseAsJson.getString("result");
+        } catch (InterruptedException | ExecutionException | JSONException e) {
+            e.printStackTrace();
+        }
+
+        switch (response) {
+            case "liked":
+                button.setImageDrawable(context.getResources().getDrawable(R.mipmap.liked_50));
+                break;
+            case "unliked":
+                button.setImageDrawable(context.getResources().getDrawable(R.mipmap.not_liked_50));
+                break;
+        }
+    }
+
+    private String createJsonForAction(int pos) {
+        int actionUserId = mLoggedInUser.getId();
+        JSONObject finishedAction = null;
+        try {
+            int postId = feedList.get(pos).getInt("id");
+
+            JSONObject action = new JSONObject();
+            action.put("user_id", actionUserId);
+            action.put("post_id", postId);
+
+            JSONArray jsonArray = new JSONArray();
+            jsonArray.put(action);
+
+            finishedAction = new JSONObject();
+            finishedAction.put("action", jsonArray);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        assert finishedAction != null: "Some JSONException when trying to create" +
+                "object to send to like/unlike";
+        return finishedAction.toString();
+    }
+
+    private void updateUserLikes() {
+        String url = "http://mytestapp-youto814.openshift.ida.liu.se/get_user_likes_by_id/"
+                + mLoggedInUser.getId();
+        System.out.println("Signed in user id: " + mLoggedInUser.getId());
+        String responseAsString;
+        JSONObject responseAsJson;
+        userLikes = new ArrayList<>();
+        try {
+            responseAsString = new DynamicAsyncTask().execute(url).get();
+            responseAsJson = new JSONObject(responseAsString);
+            JSONArray jsonArray = responseAsJson.getJSONArray("post_ids");
+            for (int i = 0; i < jsonArray.length(); i++) {
+                userLikes.add(jsonArray.getInt(i));
+            }
+        } catch (InterruptedException | JSONException | ExecutionException e) {
+            e.printStackTrace();
+            e.getMessage();
+        }
+    }
+
+    private String getNumberOfLikes(int postId) {
+        String url = "http://mytestapp-youto814.openshift.ida.liu.se/get_number_of_likes_for_post/"
+                + postId;
+        System.out.println("getting likes for: " + postId);
+        String responseAsString;
+        JSONObject responseAsJson;
+        String numberOfLikes = null;
+        try {
+            responseAsString = new DynamicAsyncTask().execute(url).get();
+            responseAsJson = new JSONObject(responseAsString);
+            System.out.println("json: " + responseAsJson);
+            numberOfLikes = responseAsJson.getString("number_of_likes");
+        } catch (JSONException | InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            e.getMessage();
+        }
+        return numberOfLikes;
+    }
+}

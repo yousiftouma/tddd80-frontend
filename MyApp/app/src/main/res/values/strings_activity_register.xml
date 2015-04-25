@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="title_activity_register">Register</string>
+
+    <!-- Strings related to registering -->
+    <string name="action_post_register">Register!</string>
+
+    <string name="error_passwords_not_matching">Passwords don\'t match!</string>
+    <string name="error_invalid_username">Username is invalid</string>
+    <string name="error_username_taken">Username is occupied</string>
+    <string name="error_email_taken">Email already registered</string>
+    <string name="error_unknown">Something went wrong</string>
+
+    <string name="prompt_username">Username</string>
+    <string name="prompt_confirm_password">Confirm password</string>
+
+    <string name="success_register">Registration successful!</string>
+
+
+</resources>
