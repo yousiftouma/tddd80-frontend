@@ -16,7 +16,9 @@ import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.example.yousiftouma.myapp.misc.CommentAdapter;
 import com.example.yousiftouma.myapp.misc.DynamicAsyncTask;
+import com.example.yousiftouma.myapp.misc.User;
 import com.google.android.gms.maps.internal.IMapFragmentDelegate;
 
 import org.json.JSONArray;
@@ -51,6 +53,9 @@ public class PostFragment extends ListFragment {
     private Button mCommentButton;
     private EditText mCommentField;
     private SeekBar mSeekBar;
+    private ArrayList<Integer> mUserLikes;
+
+    private User mLoggedInUser = User.getInstance();
 
     private ArrayList<JSONObject> comments;
 
@@ -94,6 +99,7 @@ public class PostFragment extends ListFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.fragment_post_page, container, false);
 
         mAuthorView = (TextView) view.findViewById(R.id.username);
@@ -129,6 +135,41 @@ public class PostFragment extends ListFragment {
         else {
             mPlayButton.requestFocus();
         }
+
+        mUserLikes = getUserLikes();
+
+        try {
+            if (mUserLikes.contains(mPost.getInt("id"))){
+                mLikeButton.setImageDrawable(getResources()
+                        .getDrawable(R.mipmap.liked_50));
+                mLikeButton.setTag(R.id.like_status, "unlike");
+            }
+            // else post is not liked, our "default"
+            // (needed, otherwise buttons may be set wrongly)
+            else {
+                mLikeButton.setImageDrawable(getResources()
+                        .getDrawable(R.mipmap.not_liked_50));
+                mLikeButton.setTag(R.id.like_status, "like");
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        setNumberOfLikes();
+
+        mLikeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String buttonStatus = (String) v.getTag(R.id.like_status);
+                doLikeOrUnlike(buttonStatus);
+            }
+        });
+        mCommentButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCommentField.requestFocus();
+            }
+        });
         return view;
     }
 
@@ -139,6 +180,8 @@ public class PostFragment extends ListFragment {
         ArrayList<JSONObject> comments = getComments();
         CommentAdapter adapter = new CommentAdapter(getActivity(), comments);
         listView.setAdapter(adapter);
+
+
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -194,17 +237,96 @@ public class PostFragment extends ListFragment {
         return comments;
     }
 
+    private void doLikeOrUnlike(String buttonStatus) {
+        String url;
+        String response = null;
+        String JsonString = createJsonForAction();
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
+        if (buttonStatus.equals("like") ) {
+            url = "http://mytestapp-youto814.openshift.ida.liu.se/like/";
+        }
+        else { // It says unlike and we do that
+            url = "http://mytestapp-youto814.openshift.ida.liu.se/unlike/";
+        }
+        try {
+            String responseJsonString = new DynamicAsyncTask(JsonString).execute(url).get();
+            System.out.println(responseJsonString);
+            JSONObject responseAsJson = new JSONObject(responseJsonString);
+            response = responseAsJson.getString("result");
+        } catch (InterruptedException | ExecutionException | JSONException e) {
+            e.printStackTrace();
+        }
+
+        switch (response) {
+            case "liked":
+                mLikeButton.setImageDrawable(getResources().getDrawable(R.mipmap.liked_50));
+                break;
+            case "unliked":
+                mLikeButton.setImageDrawable(getResources().getDrawable(R.mipmap.not_liked_50));
+                break;
+        }
+    }
+
+    private String createJsonForAction() {
+        int actionUserId = mLoggedInUser.getId();
+        JSONObject finishedAction = null;
+        try {
+            int postId = mPost.getInt("id");
+
+            JSONObject action = new JSONObject();
+            action.put("user_id", actionUserId);
+            action.put("post_id", postId);
+
+            JSONArray jsonArray = new JSONArray();
+            jsonArray.put(action);
+
+            finishedAction = new JSONObject();
+            finishedAction.put("action", jsonArray);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        assert finishedAction != null: "Some JSONException when trying to create" +
+                "object to send to like/unlike";
+        return finishedAction.toString();
+    }
+
+    private void setNumberOfLikes() {
+        String responseAsString;
+        JSONObject responseAsJson;
+        String numberOfLikes = null;
+        try {
+            String url = "http://mytestapp-youto814.openshift.ida.liu.se/" +
+                    "get_number_of_likes_for_post/"
+                    + mPost.getInt("id");
+            responseAsString = new DynamicAsyncTask().execute(url).get();
+            responseAsJson = new JSONObject(responseAsString);
+            numberOfLikes = responseAsJson.getString("number_of_likes");
+        } catch (JSONException | InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            e.getMessage();
+        }
+        mLikesView.setText(numberOfLikes);
+    }
+
+    private ArrayList<Integer> getUserLikes() {
+        String url = "http://mytestapp-youto814.openshift.ida.liu.se/get_user_likes_by_id/"
+                + mLoggedInUser.getId();
+        String responseAsString;
+        JSONObject responseAsJson;
+        ArrayList<Integer> likes = new ArrayList<>();
+        try {
+            responseAsString = new DynamicAsyncTask().execute(url).get();
+            responseAsJson = new JSONObject(responseAsString);
+            JSONArray jsonArray = responseAsJson.getJSONArray("post_ids");
+            for (int i = 0; i < jsonArray.length(); i++) {
+                likes.add(jsonArray.getInt(i));
+            }
+        } catch (InterruptedException | JSONException | ExecutionException e) {
+            e.printStackTrace();
+            e.getMessage();
+        } return likes;
+    }
+
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         public void onFragmentInteraction(Uri uri);

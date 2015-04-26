@@ -9,6 +9,8 @@ import android.view.MenuItem;
 import com.example.yousiftouma.myapp.misc.FeedAdapter;
 import com.example.yousiftouma.myapp.misc.User;
 
+import org.json.JSONObject;
+
 
 public class MainActivity extends ActionBarActivity implements
         UserProfileFragment.OnFragmentInteractionListener,
@@ -65,13 +67,13 @@ public class MainActivity extends ActionBarActivity implements
     }
 
     @Override
-    public void onFeedItemSelected(int postId) {
-        System.out.println("From activity, changing fragment to post for: " + postId);
+    public void onFeedItemSelected(JSONObject post) {
+        System.out.println("From activity, changing fragment to post for: " + post);
     }
 
     @Override
-    public void onCommentClicked(int postId) {
+    public void onCommentClicked(JSONObject post) {
         System.out.println("From activity, changing fragment to post with comment" +
-                "for: " + postId);
+                "for: " + post);
     }
 }

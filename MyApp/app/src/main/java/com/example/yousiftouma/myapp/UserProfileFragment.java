@@ -117,11 +117,7 @@ public class UserProfileFragment extends ListFragment {
     // TODO: Rename method, update argument and hook method into UI event
     public void onListItemClicked(int position) {
         if (mListener != null) {
-            try {
-                mListener.onFeedItemSelected(posts.get(position).getInt("id"));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+        mListener.onFeedItemSelected(posts.get(position));
         }
     }
 
@@ -154,11 +150,12 @@ public class UserProfileFragment extends ListFragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFeedItemSelected(int postId);
+        public void onFeedItemSelected(JSONObject post);
     }
 
     private ArrayList<JSONObject> getPosts() {
-        String url = "http://mytestapp-youto814.openshift.ida.liu.se/get_posts_by_id/" + mProfileUserId;
+        String url = "http://mytestapp-youto814.openshift.ida.liu.se/get_posts_by_id/"
+                + mProfileUserId;
         posts = new ArrayList<>();
         try {
             String response = new DynamicAsyncTask().execute(url).get();

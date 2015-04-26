@@ -167,8 +167,6 @@ public class FeedAdapter extends BaseAdapter {
         String url;
         String response = null;
         String JsonString = createJsonForAction(pos);
-        System.out.println("comparison with equals: " + buttonStatus.equals("like"));
-
 
         if (buttonStatus.equals("like") ) {
             url = "http://mytestapp-youto814.openshift.ida.liu.se/like/";
