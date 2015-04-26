@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MyApp</string>
+    <string name="app_name">Tingle</string>
 
     <string name="hello_world">Hello world!</string>
 
@@ -19,5 +19,8 @@
     <string name="button_comment">Comment</string>
 
     <string name="default_likes_comments">0</string>
+    <string name="like_button_description">thumbsUp</string>
+    <string name="comment_hint">Comment…</string>
+    <string name="comment">Comment</string>
 
 </resources>

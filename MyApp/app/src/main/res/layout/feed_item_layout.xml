@@ -78,7 +78,8 @@
                 android:id="@+id/button_like"
                 android:textColor="#ff557cff"
                 android:background="?android:attr/selectableItemBackground"
-                android:src="@mipmap/not_liked_50"/>
+                android:src="@mipmap/not_liked_50"
+                android:contentDescription="@string/like_button_description" />
 
             <Button
                 style="?android:attr/buttonBarButtonStyle"

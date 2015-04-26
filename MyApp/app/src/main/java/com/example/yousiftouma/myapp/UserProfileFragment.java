@@ -56,7 +56,6 @@ public class UserProfileFragment extends ListFragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * mLoggedInUser The logged in user object
      * @param profileUserId id of user who owns profile to be viewed
      * @return A new instance of fragment UserProfileFragment.
      */
