@@ -6,11 +6,13 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.example.yousiftouma.myapp.misc.FeedAdapter;
 import com.example.yousiftouma.myapp.misc.User;
 
 
 public class MainActivity extends ActionBarActivity implements
-        UserProfileFragment.OnFragmentInteractionListener {
+        UserProfileFragment.OnFragmentInteractionListener,
+        FeedAdapter.OnCommentButtonClickedListener{
 
     private User loggedInUser;
 
@@ -65,5 +67,11 @@ public class MainActivity extends ActionBarActivity implements
     @Override
     public void onFeedItemSelected(int postId) {
         System.out.println("From activity, changing fragment to post for: " + postId);
+    }
+
+    @Override
+    public void onCommentClicked(int postId) {
+        System.out.println("From activity, changing fragment to post with comment" +
+                "for: " + postId);
     }
 }

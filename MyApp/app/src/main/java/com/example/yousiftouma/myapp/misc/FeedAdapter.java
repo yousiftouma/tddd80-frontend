@@ -2,6 +2,7 @@ package com.example.yousiftouma.myapp.misc;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,8 +32,6 @@ public class FeedAdapter extends BaseAdapter {
     private JSONObject post;
     private ViewHolder viewHolder;
     private User mLoggedInUser = User.getInstance();
-
-    private OnCommentButtonClickedListener mListener;
 
     public FeedAdapter(Context context, ArrayList<JSONObject> feedList, ArrayList<Integer> likes) {
         super();
@@ -138,7 +137,7 @@ public class FeedAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
                 int position = (Integer) v.getTag();
-                onCommentButtonClicked(position);
+                onCommentButtonClicked(v, position);
 
             }
         });
@@ -151,13 +150,22 @@ public class FeedAdapter extends BaseAdapter {
         public void onCommentClicked(int postId);
     }
 
-    public void onCommentButtonClicked(int position) {
-        if (mListener != null) {
-            try {
-                mListener.onCommentClicked(feedList.get(position).getInt("id"));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+    public void onCommentButtonClicked(View view, int position) {
+        Context context = view.getContext();
+        int postId = -1;
+        String TAG = "PostID error";
+        try {
+            postId = feedList.get(position).getInt("id");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        if (context instanceof OnCommentButtonClickedListener && postId != -1) {
+            ((OnCommentButtonClickedListener) context).onCommentClicked(postId);
+        }
+        else {
+            Log.w(TAG, "Either JSONException for getting postId, or " +
+                    "Activity should implement OnCommentButtonClickedListener:"
+                    + context.getClass().getName());
         }
     }
 
