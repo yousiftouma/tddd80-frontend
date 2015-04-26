@@ -1,7 +1,6 @@
 package com.example.yousiftouma.myapp.misc;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,7 +24,7 @@ import java.util.concurrent.ExecutionException;
  */
 public class FeedAdapter extends BaseAdapter {
 
-    private ArrayList<JSONObject> feedList;
+    private ArrayList<JSONObject> posts;
     private ArrayList<Integer> userLikes;
     private LayoutInflater mInflater;
     private Context context;
@@ -33,9 +32,9 @@ public class FeedAdapter extends BaseAdapter {
     private ViewHolder viewHolder;
     private User mLoggedInUser = User.getInstance();
 
-    public FeedAdapter(Context context, ArrayList<JSONObject> feedList, ArrayList<Integer> likes) {
+    public FeedAdapter(Context context, ArrayList<JSONObject> posts, ArrayList<Integer> likes) {
         super();
-        this.feedList = feedList;
+        this.posts = posts;
         this.mInflater = LayoutInflater.from(context);
         this.userLikes = likes;
         this.context = context;
@@ -43,12 +42,12 @@ public class FeedAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return feedList.size();
+        return posts.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return feedList.get(position);
+        return posts.get(position);
     }
 
     @Override
@@ -94,7 +93,7 @@ public class FeedAdapter extends BaseAdapter {
          * Gets a JSON object containing a post, gets the data
          * from every key and sets it to the corresponding TextView
          */
-        post = feedList.get(position);
+        post = posts.get(position);
         System.out.println("curr pos= " + position);
         viewHolder.buttonLike.setTag(R.id.button_position_in_feed, position);
         viewHolder.buttonComment.setTag(position);
@@ -147,24 +146,19 @@ public class FeedAdapter extends BaseAdapter {
 
     public interface OnCommentButtonClickedListener {
         // TODO: Update argument type and name
-        public void onCommentClicked(int postId);
+        public void onCommentClicked(JSONObject post);
     }
 
     public void onCommentButtonClicked(View view, int position) {
         Context context = view.getContext();
-        int postId = -1;
-        String TAG = "PostID error";
-        try {
-            postId = feedList.get(position).getInt("id");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        if (context instanceof OnCommentButtonClickedListener && postId != -1) {
-            ((OnCommentButtonClickedListener) context).onCommentClicked(postId);
+        String TAG = "CommentButtonClicked Error";
+        JSONObject post = posts.get(position);
+
+        if (context instanceof OnCommentButtonClickedListener) {
+            ((OnCommentButtonClickedListener) context).onCommentClicked(post);
         }
         else {
-            Log.w(TAG, "Either JSONException for getting postId, or " +
-                    "Activity should implement OnCommentButtonClickedListener:"
+            Log.w(TAG, "Activity should implement OnCommentButtonClickedListener:"
                     + context.getClass().getName());
         }
     }
@@ -205,7 +199,7 @@ public class FeedAdapter extends BaseAdapter {
         int actionUserId = mLoggedInUser.getId();
         JSONObject finishedAction = null;
         try {
-            int postId = feedList.get(pos).getInt("id");
+            int postId = posts.get(pos).getInt("id");
 
             JSONObject action = new JSONObject();
             action.put("user_id", actionUserId);

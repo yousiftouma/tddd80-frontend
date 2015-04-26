@@ -282,7 +282,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
         private JSONObject jsonResponse, data;
         private JSONArray jsonArray;
-        private String errortype;
+        private String errorType;
 
         UserLoginTask(String email, String password) {
             mEmail = email;
@@ -310,16 +310,16 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 if (!jsonArray.isNull(0)) {
                     data = jsonArray.getJSONObject(0);
                 } else {
-                    errortype = "email";
+                    errorType = "email";
                     return false;
                 }
                 if (data.length() == 5) {
                     if (!data.get("password").equals(mPassword)) {
-                        errortype = "password";
+                        errorType = "password";
                         return false;
                     }
                 } else {
-                    errortype = "unknown";
+                    errorType = "unknown";
                     return false;
                 }
             } catch (JSONException e) {
@@ -337,7 +337,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 user.setInfo(data);
                 goToMainActivity();
             } else {
-                switch (errortype) {
+                switch (errorType) {
                     case "email":
                         mEmailView.setError(getString(R.string.error_email_does_not_exist));
                         mEmailView.requestFocus();
