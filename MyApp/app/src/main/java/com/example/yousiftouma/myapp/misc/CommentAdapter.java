@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.example.yousiftouma.myapp.R;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -93,7 +94,8 @@ public class CommentAdapter extends BaseAdapter {
         try {
             responseAsString = new DynamicAsyncTask().execute(url).get();
             responseAsJson = new JSONObject(responseAsString);
-            JSONObject user = responseAsJson.getJSONObject("user");
+            JSONArray jsonArray = responseAsJson.getJSONArray("user");
+            JSONObject user = jsonArray.getJSONObject(0);
             username = user.getString("username");
         } catch (JSONException | InterruptedException | ExecutionException e) {
             e.printStackTrace();

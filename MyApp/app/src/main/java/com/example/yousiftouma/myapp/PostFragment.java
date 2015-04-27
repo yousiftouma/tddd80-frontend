@@ -2,30 +2,33 @@ package com.example.yousiftouma.myapp;
 
 import android.app.Activity;
 import android.app.ListFragment;
+import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.support.annotation.NonNull;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.yousiftouma.myapp.misc.CommentAdapter;
 import com.example.yousiftouma.myapp.misc.DynamicAsyncTask;
 import com.example.yousiftouma.myapp.misc.User;
-import com.google.android.gms.maps.internal.IMapFragmentDelegate;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
@@ -58,8 +61,11 @@ public class PostFragment extends ListFragment {
     private User mLoggedInUser = User.getInstance();
 
     private ArrayList<JSONObject> comments;
+    private CommentAdapter adapter;
 
     private OnFragmentInteractionListener mListener;
+
+    private InputMethodManager inputMethodManager;
 
     /**
      * Use this factory method to create a new instance of
@@ -129,23 +135,25 @@ public class PostFragment extends ListFragment {
             e.printStackTrace();
         }
 
+        // check if we came to fragment through comment button or through post item clicked
         if (mIsCommentHighlighted) {
+            System.out.println("came thru cmnt");
             mCommentField.requestFocus();
+            // TODO: Open soft keyboard
         }
         else {
             mPlayButton.requestFocus();
         }
-
         mUserLikes = getUserLikes();
 
         try {
+            // check if post is liked, to know what button to display
             if (mUserLikes.contains(mPost.getInt("id"))){
                 mLikeButton.setImageDrawable(getResources()
                         .getDrawable(R.mipmap.liked_50));
                 mLikeButton.setTag(R.id.like_status, "unlike");
             }
             // else post is not liked, our "default"
-            // (needed, otherwise buttons may be set wrongly)
             else {
                 mLikeButton.setImageDrawable(getResources()
                         .getDrawable(R.mipmap.not_liked_50));
@@ -168,8 +176,31 @@ public class PostFragment extends ListFragment {
             @Override
             public void onClick(View v) {
                 mCommentField.requestFocus();
+                inputMethodManager = (InputMethodManager) getActivity().
+                        getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputMethodManager.showSoftInput(mCommentField, InputMethodManager.SHOW_FORCED);
             }
         });
+
+        mCommentField.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                String comment = mCommentField.getText().toString();
+                if ((actionId == EditorInfo.IME_NULL || actionId == EditorInfo.IME_ACTION_DONE)
+                        && !comment.trim().isEmpty()){
+                    System.out.println("pressed done");
+                    mCommentField.setText("");
+                    postComment(comment);
+                    return false;
+                }
+                else {
+                    Toast.makeText(getActivity(), "Try writing something!", Toast.LENGTH_LONG)
+                            .show();
+                    return true;
+                }
+            }
+        });
+
         return view;
     }
 
@@ -177,10 +208,13 @@ public class PostFragment extends ListFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         ListView listView = getListView();
-        ArrayList<JSONObject> comments = getComments();
-        CommentAdapter adapter = new CommentAdapter(getActivity(), comments);
+        //we create one object for comments and fill it with all comments
+        //from getComments(), this so we keep the same object passed to the
+        //adapter as dataset.
+        comments = new ArrayList<>();
+        comments.addAll(getComments());
+        adapter = new CommentAdapter(getActivity(), comments);
         listView.setAdapter(adapter);
-
 
     }
 
@@ -237,10 +271,46 @@ public class PostFragment extends ListFragment {
         return comments;
     }
 
+    private void postComment(String comment) {
+        String url = "http://mytestapp-youto814.openshift.ida.liu.se/add_comment";
+        String response = null;
+        String JsonString = createJsonForComment(comment);
+
+        try {
+            // do post
+            String responseJsonString = new DynamicAsyncTask(JsonString).execute(url).get();
+            System.out.println("server response: " + responseJsonString);
+            JSONObject responseAsJson = new JSONObject(responseJsonString);
+            System.out.println("jsonresponse: " + responseAsJson);
+            response = responseAsJson.getString("result");
+            System.out.println("response (ok): " + response);
+
+        } catch (InterruptedException | ExecutionException | JSONException e) {
+            e.printStackTrace();
+        }
+        switch (response) {
+            case "ok":
+                System.out.println("comment made!");
+                //repopulate the list with new comment included and notify
+                //adapter of updated list
+                comments.clear();
+                comments.addAll(getComments());
+                adapter.notifyDataSetChanged();
+                Toast.makeText(getActivity(), "Comment added!",
+                        Toast.LENGTH_LONG).show();
+                break;
+            default:
+                Toast.makeText(getActivity(), "Could not add comment...",
+                        Toast.LENGTH_LONG).show();
+        }
+
+
+    }
+
     private void doLikeOrUnlike(String buttonStatus) {
         String url;
         String response = null;
-        String JsonString = createJsonForAction();
+        String JsonString = createJsonForLikeOrUnlike();
 
         if (buttonStatus.equals("like") ) {
             url = "http://mytestapp-youto814.openshift.ida.liu.se/like/";
@@ -249,6 +319,7 @@ public class PostFragment extends ListFragment {
             url = "http://mytestapp-youto814.openshift.ida.liu.se/unlike/";
         }
         try {
+            // do post
             String responseJsonString = new DynamicAsyncTask(JsonString).execute(url).get();
             System.out.println(responseJsonString);
             JSONObject responseAsJson = new JSONObject(responseJsonString);
@@ -256,7 +327,6 @@ public class PostFragment extends ListFragment {
         } catch (InterruptedException | ExecutionException | JSONException e) {
             e.printStackTrace();
         }
-
         switch (response) {
             case "liked":
                 mLikeButton.setImageDrawable(getResources().getDrawable(R.mipmap.liked_50));
@@ -267,7 +337,7 @@ public class PostFragment extends ListFragment {
         }
     }
 
-    private String createJsonForAction() {
+    private String createJsonForLikeOrUnlike() {
         int actionUserId = mLoggedInUser.getId();
         JSONObject finishedAction = null;
         try {
@@ -287,6 +357,30 @@ public class PostFragment extends ListFragment {
         }
         assert finishedAction != null: "Some JSONException when trying to create" +
                 "object to send to like/unlike";
+        return finishedAction.toString();
+    }
+
+    private String createJsonForComment(String text) {
+        int commentUserId = mLoggedInUser.getId();
+        JSONObject finishedAction = null;
+        try {
+            int postId = mPost.getInt("id");
+
+            JSONObject comment = new JSONObject();
+            comment.put("user_id", commentUserId);
+            comment.put("song_post_id", postId);
+            comment.put("text", text);
+
+            JSONArray jsonArray = new JSONArray();
+            jsonArray.put(comment);
+
+            finishedAction = new JSONObject();
+            finishedAction.put("comment", jsonArray);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        assert finishedAction != null: "Some JSONException when trying to create" +
+                "object to send to postComment";
         return finishedAction.toString();
     }
 
@@ -331,6 +425,5 @@ public class PostFragment extends ListFragment {
         // TODO: Update argument type and name
         public void onFragmentInteraction(Uri uri);
     }
-
 
 }

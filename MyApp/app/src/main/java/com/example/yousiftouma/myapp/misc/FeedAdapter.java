@@ -166,7 +166,7 @@ public class FeedAdapter extends BaseAdapter {
     private void doLikeOrUnlike(String buttonStatus, int pos, ImageButton button) {
         String url;
         String response = null;
-        String JsonString = createJsonForAction(pos);
+        String JsonString = createJsonForLikeOrUnlike(pos);
 
         if (buttonStatus.equals("like") ) {
             url = "http://mytestapp-youto814.openshift.ida.liu.se/like/";
@@ -193,7 +193,7 @@ public class FeedAdapter extends BaseAdapter {
         }
     }
 
-    private String createJsonForAction(int pos) {
+    private String createJsonForLikeOrUnlike(int pos) {
         int actionUserId = mLoggedInUser.getId();
         JSONObject finishedAction = null;
         try {

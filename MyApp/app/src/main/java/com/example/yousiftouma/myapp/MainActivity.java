@@ -1,5 +1,7 @@
 package com.example.yousiftouma.myapp;
 
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.net.Uri;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -14,9 +16,12 @@ import org.json.JSONObject;
 
 public class MainActivity extends ActionBarActivity implements
         UserProfileFragment.OnFragmentInteractionListener,
-        FeedAdapter.OnCommentButtonClickedListener{
+        FeedAdapter.OnCommentButtonClickedListener,
+        PostFragment.OnFragmentInteractionListener{
 
     private User loggedInUser;
+    private FragmentManager fm = getFragmentManager();
+    private Fragment newFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,11 +40,11 @@ public class MainActivity extends ActionBarActivity implements
             }
 
             // Create a new Fragment to be placed in the activity layout
-            UserProfileFragment firstFragment = UserProfileFragment.newInstance(loggedInUser.getId());
+            newFragment = UserProfileFragment.newInstance(loggedInUser.getId());
 
             // Add fragment to container
             getFragmentManager().beginTransaction()
-                    .add(R.id.fragment_container, firstFragment).commit();
+                    .add(R.id.fragment_container, newFragment).commit();
         }
     }
 
@@ -67,13 +72,33 @@ public class MainActivity extends ActionBarActivity implements
     }
 
     @Override
+    public void onBackPressed() {
+        if (fm.getBackStackEntryCount() != 0) {
+            fm.popBackStack();
+        }
+        else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
     public void onFeedItemSelected(JSONObject post) {
-        System.out.println("From activity, changing fragment to post for: " + post);
+        newFragment = PostFragment.newInstance(post, false);
+        replaceFragment();
     }
 
     @Override
     public void onCommentClicked(JSONObject post) {
-        System.out.println("From activity, changing fragment to post with comment" +
-                "for: " + post);
+        newFragment = PostFragment.newInstance(post, true);
+        replaceFragment();
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+    }
+
+    private void replaceFragment() {
+        fm.beginTransaction()
+                .replace(R.id.fragment_container, newFragment).addToBackStack(null).commit();
     }
 }

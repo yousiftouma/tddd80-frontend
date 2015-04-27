@@ -98,15 +98,12 @@
             <SeekBar
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/seekBar"
-                android:layout_above="@+id/listView"
-                android:layout_centerHorizontal="true"
-                android:layout_below="@+id/linearLayout2" />
+                android:id="@+id/seekBar"/>
 
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="00:00"
+                android:text="@string/song_start_time"
                 android:id="@+id/songtimeView"
                 android:gravity="center" />
 
@@ -121,7 +118,9 @@
                     android:id="@+id/button_rewind"
                     android:src="@android:drawable/ic_media_rew"
                     android:layout_weight="0.25"
-                    android:clickable="false" />
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true" />
 
                 <ImageButton
                     android:layout_width="0dp"
@@ -139,7 +138,9 @@
                     android:id="@+id/button_pause"
                     android:src="@android:drawable/ic_media_pause"
                     android:layout_weight="0.25"
-                    android:clickable="false" />
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true" />
 
                 <ImageButton
                     android:layout_width="0dp"
@@ -147,7 +148,9 @@
                     android:id="@+id/button_fastforward"
                     android:src="@android:drawable/ic_media_ff"
                     android:layout_weight="0.25"
-                    android:clickable="true" />
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true" />
 
             </LinearLayout>
         </TableLayout>
@@ -156,19 +159,24 @@
     <ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/listView"
+        android:id="@id/android:list"
         android:layout_centerHorizontal="true"
         android:layout_above="@+id/comment_edittext"
-        android:layout_below="@+id/linearLayout2" />
+        android:layout_below="@+id/linearLayout2"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp" />
 
     <EditText
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:id="@+id/comment_edittext"
-        android:editable="false"
         android:focusable="true"
         android:enabled="true"
         android:inputType="text"
+        android:imeActionLabel="@string/abc_action_mode_done"
+        android:imeOptions="actionUnspecified"
         android:hint="@string/comment_hint"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
