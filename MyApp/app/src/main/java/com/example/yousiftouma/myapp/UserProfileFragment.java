@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -47,6 +48,7 @@ public class UserProfileFragment extends ListFragment {
     private TextView mProfileUserNameView;
     private ImageView mProfileUserImageView;
     private ProgressDialog mProgressDialog;
+    private ImageButton mFollowButton;
 
     private ArrayList<JSONObject> posts;
 
@@ -88,6 +90,14 @@ public class UserProfileFragment extends ListFragment {
 
         mProfileUserNameView = (TextView) view.findViewById(R.id.profile_username_view);
         mProfileUserImageView = (ImageView) view.findViewById(R.id.profile_pic_view);
+        mFollowButton = (ImageButton) view.findViewById(R.id.button_follow);
+
+        mFollowButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
 
         return view;
     }
@@ -108,8 +118,7 @@ public class UserProfileFragment extends ListFragment {
         });
 
         ArrayList<JSONObject> posts = getPosts();
-        ArrayList<Integer> likes = getUserLikes();
-        FeedAdapter adapter = new FeedAdapter(getActivity(), posts, likes);
+        FeedAdapter adapter = new FeedAdapter(getActivity(), posts);
         list.setAdapter(adapter);
         mProgressDialog.dismiss();
     }
@@ -154,7 +163,7 @@ public class UserProfileFragment extends ListFragment {
     }
 
     private ArrayList<JSONObject> getPosts() {
-        String url = "http://mytestapp-youto814.openshift.ida.liu.se/get_posts_by_id/"
+        String url = MainActivity.SERVER_URL + "get_posts_by_id/"
                 + mProfileUserId;
         posts = new ArrayList<>();
         try {
@@ -171,28 +180,8 @@ public class UserProfileFragment extends ListFragment {
         return posts;
     }
 
-    private ArrayList<Integer> getUserLikes() {
-        String url = "http://mytestapp-youto814.openshift.ida.liu.se/get_user_likes_by_id/"
-                + mLoggedInUser.getId();
-        System.out.println("Signed in user id: " + mLoggedInUser.getId());
-        String responseAsString;
-        JSONObject responseAsJson;
-        ArrayList<Integer> likes = new ArrayList<>();
-        try {
-            responseAsString = new DynamicAsyncTask().execute(url).get();
-            responseAsJson = new JSONObject(responseAsString);
-            JSONArray jsonArray = responseAsJson.getJSONArray("post_ids");
-            for (int i = 0; i < jsonArray.length(); i++) {
-                likes.add(jsonArray.getInt(i));
-            }
-        } catch (InterruptedException | JSONException | ExecutionException e) {
-            e.printStackTrace();
-            e.getMessage();
-        } return likes;
-    }
-
     private void setProfileDetails() {
-        String url = "http://mytestapp-youto814.openshift.ida.liu.se/get_user_by_id/"
+        String url = MainActivity.SERVER_URL + "get_user_by_id/"
                 + mProfileUserId;
         try {
             String response = new DynamicAsyncTask().execute(url).get();

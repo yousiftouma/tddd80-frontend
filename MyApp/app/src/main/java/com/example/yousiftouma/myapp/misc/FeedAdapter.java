@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.example.yousiftouma.myapp.MainActivity;
 import com.example.yousiftouma.myapp.R;
 
 import org.json.JSONArray;
@@ -25,18 +26,16 @@ import java.util.concurrent.ExecutionException;
 public class FeedAdapter extends BaseAdapter {
 
     private ArrayList<JSONObject> posts;
-    private ArrayList<Integer> userLikes;
     private LayoutInflater mInflater;
     private Context context;
     private JSONObject post;
     private ViewHolder viewHolder;
     private User mLoggedInUser = User.getInstance();
 
-    public FeedAdapter(Context context, ArrayList<JSONObject> posts, ArrayList<Integer> likes) {
+    public FeedAdapter(Context context, ArrayList<JSONObject> posts) {
         super();
         this.posts = posts;
         this.mInflater = LayoutInflater.from(context);
-        this.userLikes = likes;
         this.context = context;
     }
 
@@ -103,7 +102,7 @@ public class FeedAdapter extends BaseAdapter {
             viewHolder.description.setText(post.getString("description"));
             viewHolder.numberOfLikes.setText(getNumberOfLikes(post.getInt("id")));
             // if post is already liked
-            if (userLikes.contains(post.getInt("id"))){
+            if (mLoggedInUser.getLikes().contains(post.getInt("id"))){
                 viewHolder.buttonLike.setImageDrawable(context.getResources()
                         .getDrawable(R.mipmap.liked_50));
                 viewHolder.buttonLike.setTag(R.id.like_status, "unlike");
@@ -126,7 +125,7 @@ public class FeedAdapter extends BaseAdapter {
                 int position = (Integer) v.getTag(R.id.button_position_in_feed);
                 String buttonStatus = (String) v.getTag(R.id.like_status);
                 doLikeOrUnlike(buttonStatus, position, (ImageButton) v);
-                updateUserLikes();
+                mLoggedInUser.setLikes();
                 // run getView again for this particular row so it is updated
                 getView(position, view, parent);
             }
@@ -169,10 +168,10 @@ public class FeedAdapter extends BaseAdapter {
         String JsonString = createJsonForLikeOrUnlike(pos);
 
         if (buttonStatus.equals("like") ) {
-            url = "http://mytestapp-youto814.openshift.ida.liu.se/like/";
+            url = MainActivity.SERVER_URL + "like/";
         }
         else { // It says unlike and we do that
-            url = "http://mytestapp-youto814.openshift.ida.liu.se/unlike/";
+            url = MainActivity.SERVER_URL + "unlike/";
         }
         try {
             String responseJsonString = new DynamicAsyncTask(JsonString).execute(url).get();
@@ -216,28 +215,8 @@ public class FeedAdapter extends BaseAdapter {
         return finishedAction.toString();
     }
 
-    private void updateUserLikes() {
-        String url = "http://mytestapp-youto814.openshift.ida.liu.se/get_user_likes_by_id/"
-                + mLoggedInUser.getId();
-        System.out.println("Signed in user id: " + mLoggedInUser.getId());
-        String responseAsString;
-        JSONObject responseAsJson;
-        userLikes = new ArrayList<>();
-        try {
-            responseAsString = new DynamicAsyncTask().execute(url).get();
-            responseAsJson = new JSONObject(responseAsString);
-            JSONArray jsonArray = responseAsJson.getJSONArray("post_ids");
-            for (int i = 0; i < jsonArray.length(); i++) {
-                userLikes.add(jsonArray.getInt(i));
-            }
-        } catch (InterruptedException | JSONException | ExecutionException e) {
-            e.printStackTrace();
-            e.getMessage();
-        }
-    }
-
     private String getNumberOfLikes(int postId) {
-        String url = "http://mytestapp-youto814.openshift.ida.liu.se/get_number_of_likes_for_post/"
+        String url = MainActivity.SERVER_URL + "get_number_of_likes_for_post/"
                 + postId;
         System.out.println("getting likes for: " + postId);
         String responseAsString;

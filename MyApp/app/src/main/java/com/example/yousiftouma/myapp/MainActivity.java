@@ -22,6 +22,7 @@ public class MainActivity extends ActionBarActivity implements
     private User loggedInUser;
     private FragmentManager fm = getFragmentManager();
     private Fragment newFragment;
+    public static String SERVER_URL = "http://mytestapp-youto814.openshift.ida.liu.se/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

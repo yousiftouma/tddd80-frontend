@@ -144,11 +144,10 @@ public class PostFragment extends ListFragment {
         else {
             mPlayButton.requestFocus();
         }
-        mUserLikes = getUserLikes();
 
         try {
             // check if post is liked, to know what button to display
-            if (mUserLikes.contains(mPost.getInt("id"))){
+            if (mLoggedInUser.getLikes().contains(mPost.getInt("id"))){
                 mLikeButton.setImageDrawable(getResources()
                         .getDrawable(R.mipmap.liked_50));
                 mLikeButton.setTag(R.id.like_status, "unlike");
@@ -170,6 +169,8 @@ public class PostFragment extends ListFragment {
             public void onClick(View v) {
                 String buttonStatus = (String) v.getTag(R.id.like_status);
                 doLikeOrUnlike(buttonStatus);
+                setNumberOfLikes();
+                mLoggedInUser.setLikes();
             }
         });
         mCommentButton.setOnClickListener(new View.OnClickListener() {
@@ -252,7 +253,7 @@ public class PostFragment extends ListFragment {
         }
         comments = new ArrayList<>();
         if (postId != -1) {
-            url = "http://mytestapp-youto814.openshift.ida.liu.se/get_comments_for_post_by_id/" +
+            url = MainActivity.SERVER_URL + "get_comments_for_post_by_id/" +
                     postId;
             String responseAsString;
             JSONObject responseAsJson;
@@ -272,7 +273,7 @@ public class PostFragment extends ListFragment {
     }
 
     private void postComment(String comment) {
-        String url = "http://mytestapp-youto814.openshift.ida.liu.se/add_comment";
+        String url = MainActivity.SERVER_URL + "add_comment";
         String response = null;
         String JsonString = createJsonForComment(comment);
 
@@ -313,20 +314,25 @@ public class PostFragment extends ListFragment {
         String JsonString = createJsonForLikeOrUnlike();
 
         if (buttonStatus.equals("like") ) {
-            url = "http://mytestapp-youto814.openshift.ida.liu.se/like/";
+            System.out.println("like?: " + buttonStatus);
+            url = MainActivity.SERVER_URL + "like/";
+            mLikeButton.setTag(R.id.like_status, "unlike");
         }
         else { // It says unlike and we do that
-            url = "http://mytestapp-youto814.openshift.ida.liu.se/unlike/";
+            System.out.println("unlike?: " + buttonStatus);
+            url = MainActivity.SERVER_URL + "unlike/";
+            mLikeButton.setTag(R.id.like_status, "like");
         }
         try {
             // do post
             String responseJsonString = new DynamicAsyncTask(JsonString).execute(url).get();
-            System.out.println(responseJsonString);
+            System.out.println("responsejsonstring: " + responseJsonString);
             JSONObject responseAsJson = new JSONObject(responseJsonString);
             response = responseAsJson.getString("result");
         } catch (InterruptedException | ExecutionException | JSONException e) {
             e.printStackTrace();
         }
+        assert response != null: "response is null";
         switch (response) {
             case "liked":
                 mLikeButton.setImageDrawable(getResources().getDrawable(R.mipmap.liked_50));
@@ -389,7 +395,7 @@ public class PostFragment extends ListFragment {
         JSONObject responseAsJson;
         String numberOfLikes = null;
         try {
-            String url = "http://mytestapp-youto814.openshift.ida.liu.se/" +
+            String url = MainActivity.SERVER_URL +
                     "get_number_of_likes_for_post/"
                     + mPost.getInt("id");
             responseAsString = new DynamicAsyncTask().execute(url).get();
@@ -400,25 +406,6 @@ public class PostFragment extends ListFragment {
             e.getMessage();
         }
         mLikesView.setText(numberOfLikes);
-    }
-
-    private ArrayList<Integer> getUserLikes() {
-        String url = "http://mytestapp-youto814.openshift.ida.liu.se/get_user_likes_by_id/"
-                + mLoggedInUser.getId();
-        String responseAsString;
-        JSONObject responseAsJson;
-        ArrayList<Integer> likes = new ArrayList<>();
-        try {
-            responseAsString = new DynamicAsyncTask().execute(url).get();
-            responseAsJson = new JSONObject(responseAsString);
-            JSONArray jsonArray = responseAsJson.getJSONArray("post_ids");
-            for (int i = 0; i < jsonArray.length(); i++) {
-                likes.add(jsonArray.getInt(i));
-            }
-        } catch (InterruptedException | JSONException | ExecutionException e) {
-            e.printStackTrace();
-            e.getMessage();
-        } return likes;
     }
 
     public interface OnFragmentInteractionListener {

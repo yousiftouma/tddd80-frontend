@@ -180,7 +180,7 @@ public class RegisterActivity extends Activity implements LoaderManager.LoaderCa
         try {
             HttpClient httpclient = new DefaultHttpClient();
             HttpPost httpPost = new HttpPost(
-                    "http://mytestapp-youto814.openshift.ida.liu.se/register_user");
+                    MainActivity.SERVER_URL + "register_user");
 
             JSONObject user = new JSONObject();
             user.put("username", username);

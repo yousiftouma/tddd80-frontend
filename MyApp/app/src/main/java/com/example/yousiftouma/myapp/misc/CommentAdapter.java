@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.example.yousiftouma.myapp.MainActivity;
 import com.example.yousiftouma.myapp.R;
 
 import org.json.JSONArray;
@@ -86,7 +87,7 @@ public class CommentAdapter extends BaseAdapter {
     }
 
     private String getAuthor(int userId){
-        String url = "http://mytestapp-youto814.openshift.ida.liu.se/get_user_by_id/"
+        String url = MainActivity.SERVER_URL + "get_user_by_id/"
                 + userId;
         String responseAsString;
         JSONObject responseAsJson;

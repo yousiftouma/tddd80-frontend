@@ -370,7 +370,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             HttpClient httpclient = new DefaultHttpClient();
 
             HttpResponse httpResponse = httpclient.execute(new HttpGet(
-                    "http://mytestapp-youto814.openshift.ida.liu.se/get_user_by_email/" + email));
+                    MainActivity.SERVER_URL + "get_user_by_email/" + email));
 
             inputStream = httpResponse.getEntity().getContent();
 
