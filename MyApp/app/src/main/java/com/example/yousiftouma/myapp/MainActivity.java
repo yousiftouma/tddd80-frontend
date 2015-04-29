@@ -17,7 +17,8 @@ import org.json.JSONObject;
 public class MainActivity extends ActionBarActivity implements
         UserProfileFragment.OnFragmentInteractionListener,
         FeedAdapter.OnCommentButtonClickedListener,
-        PostFragment.OnFragmentInteractionListener{
+        PostFragment.OnFragmentInteractionListener,
+        FeedFragment.OnFragmentInteractionListener {
 
     private User loggedInUser;
     private FragmentManager fm = getFragmentManager();
@@ -40,9 +41,10 @@ public class MainActivity extends ActionBarActivity implements
                 return;
             }
 
-            // Create a new Fragment to be placed in the activity layout
+            // TODO: Create a new Fragment to be placed in the activity layout
             //newFragment = UserProfileFragment.newInstance(loggedInUser.getId());
-            newFragment = UserProfileFragment.newInstance(2);
+            //newFragment = UserProfileFragment.newInstance(2);
+            newFragment = new FeedFragment();
 
             // Add fragment to container
             getFragmentManager().beginTransaction()
@@ -103,5 +105,16 @@ public class MainActivity extends ActionBarActivity implements
     @Override
     public void onPostFragmentUsernameButtonClicked() {
         // TODO: Change to profile of the user you clicked in PostFragment
+    }
+
+    @Override
+    public void onFeedFragmentItemClicked(JSONObject post) {
+        newFragment = PostFragment.newInstance(post, false);
+        replaceFragment();
+    }
+
+    @Override
+    public void onNewPostButtonClicked() {
+        // TODO: Change to MakePostFragment
     }
 }
