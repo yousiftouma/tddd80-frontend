@@ -3,7 +3,6 @@ package com.example.yousiftouma.myapp;
 import android.app.Activity;
 import android.app.ListFragment;
 import android.app.ProgressDialog;
-import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.support.annotation.NonNull;
@@ -37,11 +36,9 @@ import java.util.concurrent.ExecutionException;
  * create an instance of this fragment.
  */
 public class UserProfileFragment extends ListFragment {
-    // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String PROFILE_USER = "profile_user";
 
-    // TODO: Rename and change types of parameters
     private int mProfileUserId;
 
     private User mLoggedInUser;
@@ -92,9 +89,28 @@ public class UserProfileFragment extends ListFragment {
         mProfileUserImageView = (ImageView) view.findViewById(R.id.profile_pic_view);
         mFollowButton = (ImageButton) view.findViewById(R.id.button_follow);
 
+        if (mProfileUserId == mLoggedInUser.getId()) {
+            mFollowButton.setEnabled(false);
+            mFollowButton.setImageDrawable(getResources().getDrawable(R.mipmap.cant_follow_50));
+        }
+        else {
+            mFollowButton.setEnabled(true);
+            if (mLoggedInUser.getFollows().contains(mProfileUserId)) {
+                mFollowButton.setTag(R.id.follow_status, "unfollow");
+                mFollowButton.setImageDrawable(getResources().getDrawable(R.mipmap.unfollow_50));
+            }
+            else {
+                mFollowButton.setTag(R.id.follow_status, "follow");
+                mFollowButton.setImageDrawable(getResources().getDrawable(R.mipmap.follow_50));
+            }
+        }
+
         mFollowButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String followStatus = (String) v.getTag(R.id.follow_status);
+                doFollowOrUnfollow(followStatus, (ImageButton) v);
+                mLoggedInUser.setFollows();
 
             }
         });
@@ -123,10 +139,9 @@ public class UserProfileFragment extends ListFragment {
         mProgressDialog.dismiss();
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
     public void onListItemClicked(int position) {
         if (mListener != null) {
-        mListener.onFeedItemSelected(posts.get(position));
+        mListener.onUserProfileFeedListItemSelected(posts.get(position));
         }
     }
 
@@ -159,7 +174,7 @@ public class UserProfileFragment extends ListFragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFeedItemSelected(JSONObject post);
+        public void onUserProfileFeedListItemSelected(JSONObject post);
     }
 
     private ArrayList<JSONObject> getPosts() {
@@ -196,5 +211,60 @@ public class UserProfileFragment extends ListFragment {
             e.printStackTrace();
             e.getMessage();
         }
+    }
+
+    private void doFollowOrUnfollow(String buttonStatus, ImageButton button) {
+        String url;
+        String response = null;
+        String JsonString = createJsonForFollowOrUnfollow();
+
+        if (buttonStatus.equals("follow") ) {
+            url = MainActivity.SERVER_URL + "follow/";
+        }
+        else { // It says unlike and we do that
+            url = MainActivity.SERVER_URL + "unfollow/";
+        }
+        try {
+            String responseJsonString = new DynamicAsyncTask(JsonString).execute(url).get();
+            System.out.println(responseJsonString);
+            JSONObject responseAsJson = new JSONObject(responseJsonString);
+            response = responseAsJson.getString("result");
+        } catch (InterruptedException | ExecutionException | JSONException e) {
+            e.printStackTrace();
+        }
+
+        switch (response) {
+            case "followed":
+                button.setImageDrawable(getResources().getDrawable(R.mipmap.unfollow_50));
+                button.setTag(R.id.follow_status, "unfollow");
+                break;
+            case "unfollowed":
+                button.setImageDrawable(getResources().getDrawable(R.mipmap.follow_50));
+                button.setTag(R.id.follow_status, "follow");
+                break;
+        }
+    }
+
+    private String createJsonForFollowOrUnfollow() {
+        int FollowerUserId = mLoggedInUser.getId();
+        JSONObject finishedAction = null;
+        try {
+            int FollowedUserId = mProfileUserId;
+
+            JSONObject action = new JSONObject();
+            action.put("follower_id", FollowerUserId);
+            action.put("followed_id", FollowedUserId);
+
+            JSONArray jsonArray = new JSONArray();
+            jsonArray.put(action);
+
+            finishedAction = new JSONObject();
+            finishedAction.put("action", jsonArray);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        assert finishedAction != null: "Some JSONException when trying to create" +
+                "object to send to like/unlike";
+        return finishedAction.toString();
     }
 }

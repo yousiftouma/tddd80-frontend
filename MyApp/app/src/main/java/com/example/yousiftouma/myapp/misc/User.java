@@ -19,7 +19,7 @@ public class User {
     private String email;
     private String profilePic;
     private ArrayList<Integer> likes = new ArrayList<>();
-    private ArrayList<Integer> follows;
+    private ArrayList<Integer> follows = new ArrayList<>();
 
     // Private constructor. Prevents instantiation from other classes.
     private User() {}
@@ -43,8 +43,8 @@ public class User {
             profilePic = userData.getString("profile_pic");
             username = userData.getString("username");
             email = userData.getString("email");
-            likes.clear();
-            likes.addAll(allLikesByUser());
+            setLikes();
+            setFollows();
 
         } catch (JSONException | NullPointerException e) {
             e.printStackTrace();
@@ -55,13 +55,10 @@ public class User {
     private ArrayList<Integer> allLikesByUser() {
         String url = MainActivity.SERVER_URL + "get_user_likes_by_id/"
                 + id;
-        System.out.println("Signed in user id: " + id);
-        String responseAsString;
-        JSONObject responseAsJson;
         ArrayList<Integer> likes = new ArrayList<>();
         try {
-            responseAsString = new DynamicAsyncTask().execute(url).get();
-            responseAsJson = new JSONObject(responseAsString);
+            String responseAsString = new DynamicAsyncTask().execute(url).get();
+            JSONObject responseAsJson = new JSONObject(responseAsString);
             JSONArray jsonArray = responseAsJson.getJSONArray("post_ids");
             for (int i = 0; i < jsonArray.length(); i++) {
                 likes.add(jsonArray.getInt(i));
@@ -70,6 +67,23 @@ public class User {
             e.printStackTrace();
             e.getMessage();
         } return likes;
+    }
+
+    private ArrayList<Integer> allFollowedByUser() {
+        String url = MainActivity.SERVER_URL + "get_all_followed_by_id/"
+                + id;
+        ArrayList<Integer> follows = new ArrayList<>();
+        try {
+            String responseAsString = new DynamicAsyncTask().execute(url).get();
+            JSONObject responseAsJson = new JSONObject(responseAsString);
+            JSONArray jsonArray = responseAsJson.getJSONArray("user_ids");
+            for (int i = 0; i < jsonArray.length(); i++) {
+                follows.add(jsonArray.getInt(i));
+            }
+        } catch (InterruptedException | JSONException | ExecutionException e) {
+            e.printStackTrace();
+            e.getMessage();
+        } return follows;
     }
 
     public int getId() {
@@ -99,5 +113,10 @@ public class User {
     public void setLikes() {
         likes.clear();
         likes.addAll(allLikesByUser());
+    }
+
+    public void setFollows() {
+        follows.clear();
+        follows.addAll(allFollowedByUser());
     }
 }

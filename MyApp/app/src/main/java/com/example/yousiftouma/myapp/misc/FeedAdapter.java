@@ -145,7 +145,7 @@ public class FeedAdapter extends BaseAdapter {
 
     public interface OnCommentButtonClickedListener {
         // TODO: Update argument type and name
-        public void onCommentClicked(JSONObject post);
+        public void onCommentClickedInFeedAdapter(JSONObject post);
     }
 
     public void onCommentButtonClicked(View view, int position) {
@@ -154,7 +154,7 @@ public class FeedAdapter extends BaseAdapter {
         JSONObject post = posts.get(position);
 
         if (context instanceof OnCommentButtonClickedListener) {
-            ((OnCommentButtonClickedListener) context).onCommentClicked(post);
+            ((OnCommentButtonClickedListener) context).onCommentClickedInFeedAdapter(post);
         }
         else {
             Log.w(TAG, "Activity should implement OnCommentButtonClickedListener:"

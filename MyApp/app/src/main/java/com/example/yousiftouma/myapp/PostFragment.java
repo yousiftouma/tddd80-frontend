@@ -3,7 +3,6 @@ package com.example.yousiftouma.myapp;
 import android.app.Activity;
 import android.app.ListFragment;
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.support.annotation.NonNull;
@@ -219,10 +218,10 @@ public class PostFragment extends ListFragment {
 
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
+    // TODO: Make username textview change fragment to user profile
+    public void onButtonPressed() {
         if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+            mListener.onPostFragmentUsernameButtonClicked();
         }
     }
 
@@ -409,8 +408,7 @@ public class PostFragment extends ListFragment {
     }
 
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        public void onFragmentInteraction(Uri uri);
+        public void onPostFragmentUsernameButtonClicked();
     }
 
 }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="like_status" type="id" />
+    <item name="follow_status" type="id" />
     <item name="button_position_in_feed" type="id" />
 </resources>

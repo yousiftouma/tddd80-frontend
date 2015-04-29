@@ -41,7 +41,8 @@ public class MainActivity extends ActionBarActivity implements
             }
 
             // Create a new Fragment to be placed in the activity layout
-            newFragment = UserProfileFragment.newInstance(loggedInUser.getId());
+            //newFragment = UserProfileFragment.newInstance(loggedInUser.getId());
+            newFragment = UserProfileFragment.newInstance(2);
 
             // Add fragment to container
             getFragmentManager().beginTransaction()
@@ -82,24 +83,25 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
+    private void replaceFragment() {
+        fm.beginTransaction()
+                .replace(R.id.fragment_container, newFragment).addToBackStack(null).commit();
+    }
+
     @Override
-    public void onFeedItemSelected(JSONObject post) {
+    public void onUserProfileFeedListItemSelected(JSONObject post) {
         newFragment = PostFragment.newInstance(post, false);
         replaceFragment();
     }
 
     @Override
-    public void onCommentClicked(JSONObject post) {
+    public void onCommentClickedInFeedAdapter(JSONObject post) {
         newFragment = PostFragment.newInstance(post, true);
         replaceFragment();
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
-    }
-
-    private void replaceFragment() {
-        fm.beginTransaction()
-                .replace(R.id.fragment_container, newFragment).addToBackStack(null).commit();
+    public void onPostFragmentUsernameButtonClicked() {
+        // TODO: Change to profile of the user you clicked in PostFragment
     }
 }
