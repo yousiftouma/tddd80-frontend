@@ -1,0 +1,88 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.example.yousiftouma.myapp.DoPostFragment"
+    android:clickable="true"
+    android:focusableInTouchMode="true" >
+
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="20dp"
+            android:layout_weight=".02" />
+
+        <EditText
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:id="@+id/title"
+            android:hint="@string/title_hint"
+            android:gravity="top|start"
+            android:textSize="28sp"
+            android:background="@drawable/textfield_layout"
+            android:layout_weight=".96"
+            android:imeActionLabel="Next"
+            android:singleLine="true"
+            android:maxLines="1"
+            android:inputType="text"/>
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="20dp"
+            android:layout_weight=".02" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="20dp"
+            android:layout_weight=".02" />
+
+        <EditText
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/description"
+            android:layout_marginTop="25dp"
+            android:hint="@string/description_hint"
+            android:lines="4"
+            android:minLines="3"
+            android:gravity="top|start"
+            android:scrollbars="none"
+            android:background="@drawable/textfield_layout"
+            android:layout_weight=".94"
+            android:imeActionLabel="Done"
+            android:maxLength="128"/>
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="20dp"
+            android:layout_weight=".02" />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="75dp"
+            android:text="@string/add_post"
+            android:textColor="#ff2faeff"
+            style="?android:attr/buttonBarButtonStyle"
+            android:id="@+id/button_do_post"
+            android:textSize="32sp"
+            android:layout_alignParentBottom="true" />
+    </RelativeLayout>
+
+</LinearLayout>

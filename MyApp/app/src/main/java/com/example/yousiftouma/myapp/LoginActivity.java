@@ -70,14 +70,23 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
+        mEmailView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_NEXT){
+                    mPasswordView.requestFocus();
+                }
+                return false;
+            }
+        });
 
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
+                if (id == EditorInfo.IME_NULL || id == EditorInfo.IME_ACTION_DONE) {
                     attemptLogin();
-                    return true;
+                    return false;
                 }
                 return false;
             }

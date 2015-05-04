@@ -27,5 +27,8 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="song_start_time">00:00</string>
     <string name="post_button_text">POST YOUR SONG</string>
+    <string name="title_hint">Title</string>
+    <string name="description_hint">Describe your song!</string>
+    <string name="add_post">Done!</string>
 
 </resources>

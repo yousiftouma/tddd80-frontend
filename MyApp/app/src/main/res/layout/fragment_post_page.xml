@@ -24,7 +24,11 @@
                 android:text="@string/username_holder"
                 android:id="@+id/username"
                 android:layout_marginBottom="5dp"
-                android:gravity="center" />
+                android:gravity="center"
+                android:linksClickable="false"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:clickable="true" />
 
             <TextView
                 android:layout_width="wrap_content"

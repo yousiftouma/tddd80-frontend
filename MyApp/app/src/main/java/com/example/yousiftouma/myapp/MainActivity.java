@@ -103,8 +103,9 @@ public class MainActivity extends ActionBarActivity implements
     }
 
     @Override
-    public void onPostFragmentUsernameButtonClicked() {
-        // TODO: Change to profile of the user you clicked in PostFragment
+    public void onPostFragmentUsernameButtonClicked(int userId) {
+        newFragment = UserProfileFragment.newInstance(userId);
+        replaceFragment();
     }
 
     @Override
@@ -115,6 +116,7 @@ public class MainActivity extends ActionBarActivity implements
 
     @Override
     public void onNewPostButtonClicked() {
-        // TODO: Change to MakePostFragment
+        newFragment = new DoPostFragment();
+        replaceFragment();
     }
 }

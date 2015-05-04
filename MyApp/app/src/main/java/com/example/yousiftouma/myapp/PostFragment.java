@@ -3,6 +3,7 @@ package com.example.yousiftouma.myapp;
 import android.app.Activity;
 import android.app.ListFragment;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.support.annotation.NonNull;
@@ -55,7 +56,6 @@ public class PostFragment extends ListFragment {
     private Button mCommentButton;
     private EditText mCommentField;
     private SeekBar mSeekBar;
-    private ArrayList<Integer> mUserLikes;
 
     private User mLoggedInUser = User.getInstance();
 
@@ -74,7 +74,6 @@ public class PostFragment extends ListFragment {
      * @param isCommentHighlighted If comment field should be highlighted
      * @return A new instance of fragment PostFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static PostFragment newInstance(JSONObject post, boolean isCommentHighlighted) {
         PostFragment fragment = new PostFragment();
         Bundle args = new Bundle();
@@ -108,6 +107,7 @@ public class PostFragment extends ListFragment {
         View view = inflater.inflate(R.layout.fragment_post_page, container, false);
 
         mAuthorView = (TextView) view.findViewById(R.id.username);
+        mAuthorView.setTextColor(Color.BLUE);
         mTitleView = (TextView) view.findViewById(R.id.title);
         mDescriptionView = (TextView) view.findViewById(R.id.description);
         mLikesView = (TextView) view.findViewById(R.id.likesView);
@@ -138,7 +138,7 @@ public class PostFragment extends ListFragment {
         if (mIsCommentHighlighted) {
             System.out.println("came thru cmnt");
             mCommentField.requestFocus();
-            // TODO: Open soft keyboard
+            inputMethodManager.showSoftInputFromInputMethod(mCommentField.getWindowToken(), 0);
         }
         else {
             mPlayButton.requestFocus();
@@ -201,6 +201,27 @@ public class PostFragment extends ListFragment {
             }
         });
 
+        mCommentField.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    inputMethodManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                }
+            }
+        });
+
+        mAuthorView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                v.setBackgroundColor(Color.LTGRAY);
+                try {
+                    onUsernamePressed(mPost.getInt("user_id"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
         return view;
     }
 
@@ -219,9 +240,9 @@ public class PostFragment extends ListFragment {
     }
 
     // TODO: Make username textview change fragment to user profile
-    public void onButtonPressed() {
+    public void onUsernamePressed(int userId) {
         if (mListener != null) {
-            mListener.onPostFragmentUsernameButtonClicked();
+            mListener.onPostFragmentUsernameButtonClicked(userId);
         }
     }
 
@@ -408,7 +429,7 @@ public class PostFragment extends ListFragment {
     }
 
     public interface OnFragmentInteractionListener {
-        public void onPostFragmentUsernameButtonClicked();
+        public void onPostFragmentUsernameButtonClicked(int userId);
     }
 
 }
