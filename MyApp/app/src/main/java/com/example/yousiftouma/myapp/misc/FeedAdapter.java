@@ -25,12 +25,12 @@ import java.util.concurrent.ExecutionException;
  */
 public class FeedAdapter extends BaseAdapter {
 
-    private ArrayList<JSONObject> posts;
-    private LayoutInflater mInflater;
-    private Context context;
-    private JSONObject post;
-    private ViewHolder viewHolder;
-    private User mLoggedInUser = User.getInstance();
+    protected ArrayList<JSONObject> posts;
+    protected LayoutInflater mInflater;
+    protected Context context;
+    protected JSONObject post;
+    protected ViewHolder viewHolder;
+    protected User mLoggedInUser = User.getInstance();
 
     public FeedAdapter(Context context, ArrayList<JSONObject> posts) {
         super();
@@ -54,7 +54,8 @@ public class FeedAdapter extends BaseAdapter {
         return 0;
     }
 
-    private class ViewHolder {
+    protected class ViewHolder {
+        TextView position; // only exists in subclass TopListAdapter
         TextView username;
         TextView title;
         TextView description;
@@ -93,7 +94,6 @@ public class FeedAdapter extends BaseAdapter {
          * from every key and sets it to the corresponding TextView
          */
         post = posts.get(position);
-        System.out.println("curr pos= " + position);
         viewHolder.buttonLike.setTag(R.id.button_position_in_feed, position);
         viewHolder.buttonComment.setTag(position);
         try {
@@ -161,7 +161,7 @@ public class FeedAdapter extends BaseAdapter {
         }
     }
 
-    private void doLikeOrUnlike(String buttonStatus, int pos, ImageButton button) {
+    protected void doLikeOrUnlike(String buttonStatus, int pos, ImageButton button) {
         String url;
         String response = null;
         String JsonString = createJsonForLikeOrUnlike(pos);
@@ -174,7 +174,6 @@ public class FeedAdapter extends BaseAdapter {
         }
         try {
             String responseJsonString = new DynamicAsyncTask(JsonString).execute(url).get();
-            System.out.println(responseJsonString);
             JSONObject responseAsJson = new JSONObject(responseJsonString);
             response = responseAsJson.getString("result");
         } catch (InterruptedException | ExecutionException | JSONException e) {
@@ -191,7 +190,7 @@ public class FeedAdapter extends BaseAdapter {
         }
     }
 
-    private String createJsonForLikeOrUnlike(int pos) {
+    protected String createJsonForLikeOrUnlike(int pos) {
         int actionUserId = mLoggedInUser.getId();
         JSONObject finishedAction = null;
         try {
@@ -214,17 +213,15 @@ public class FeedAdapter extends BaseAdapter {
         return finishedAction.toString();
     }
 
-    private String getNumberOfLikes(int postId) {
+    protected String getNumberOfLikes(int postId) {
         String url = MainActivity.SERVER_URL + "get_number_of_likes_for_post/"
                 + postId;
-        System.out.println("getting likes for: " + postId);
         String responseAsString;
         JSONObject responseAsJson;
         String numberOfLikes = null;
         try {
             responseAsString = new DynamicAsyncTask().execute(url).get();
             responseAsJson = new JSONObject(responseAsString);
-            System.out.println("json: " + responseAsJson);
             numberOfLikes = responseAsJson.getString("number_of_likes");
         } catch (JSONException | InterruptedException | ExecutionException e) {
             e.printStackTrace();

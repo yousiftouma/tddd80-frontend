@@ -31,5 +31,6 @@
     <string name="description_hint">Describe your song!</string>
     <string name="add_post">Done!</string>
     <string name="search">Find user</string>
+    <string name="action_top_list">Top List</string>
 
 </resources>

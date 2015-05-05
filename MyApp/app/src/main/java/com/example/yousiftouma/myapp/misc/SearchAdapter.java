@@ -38,6 +38,8 @@ public class SearchAdapter extends CursorAdapter {
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         username.setText(members.get(cursor.getPosition()));
+        username.setBackgroundColor(Color.BLACK);
+        username.setTextColor(Color.WHITE);
         username.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -54,8 +56,6 @@ public class SearchAdapter extends CursorAdapter {
                     Log.w(TAG, "Activity should implement OnSearchItemClickedListener:"
                             + context.getClass().getName());
                 }
-                v.setBackgroundColor(Color.BLACK);
-                ((TextView) v).setTextColor(Color.WHITE);
             }
         });
     }

@@ -310,9 +310,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             }
 
             //check email, if ok, check password, else set email error.
-            // if ok login, else set password error
+            // if ok, login, else set password error
             String responseString = GET(mEmail);
-            System.out.println(responseString);
             try {
                 jsonResponse = new JSONObject(responseString);
                 jsonArray = jsonResponse.getJSONArray("user");

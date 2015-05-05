@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import com.example.yousiftouma.myapp.misc.DynamicAsyncTask;
 import com.example.yousiftouma.myapp.misc.FeedAdapter;
 import com.example.yousiftouma.myapp.misc.SearchAdapter;
+import com.example.yousiftouma.myapp.misc.TopListAdapter;
 import com.example.yousiftouma.myapp.misc.User;
 
 import org.json.JSONArray;
@@ -35,7 +36,8 @@ public class MainActivity extends ActionBarActivity implements
         PostFragment.OnFragmentInteractionListener,
         FeedFragment.OnFragmentInteractionListener,
         SearchAdapter.OnSearchItemClickedListener,
-        SearchView.OnQueryTextListener{
+        TopListFragment.OnTopListFragmentInteraction,
+        SearchView.OnQueryTextListener {
 
     private User loggedInUser;
     private FragmentManager fm = getFragmentManager();
@@ -43,6 +45,7 @@ public class MainActivity extends ActionBarActivity implements
     public static String SERVER_URL = "http://mytestapp-youto814.openshift.ida.liu.se/";
     private List<String> members = getAllMembers();
     private Menu menu;
+    private MenuItem searchMenuItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,9 +63,6 @@ public class MainActivity extends ActionBarActivity implements
                 return;
             }
 
-            // TODO: Create a new Fragment to be placed in the activity layout
-            //newFragment = UserProfileFragment.newInstance(loggedInUser.getId());
-            //newFragment = UserProfileFragment.newInstance(2);
             newFragment = new FeedFragment();
 
             // Add fragment to container
@@ -100,7 +100,7 @@ public class MainActivity extends ActionBarActivity implements
 
             SearchManager manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
 
-            MenuItem searchMenuItem = menu.findItem(R.id.search);
+            searchMenuItem = menu.findItem(R.id.search);
 
             SearchView search = (SearchView) MenuItemCompat.getActionView(searchMenuItem);
             search.setSearchableInfo(manager.getSearchableInfo(getComponentName()));
@@ -157,12 +157,11 @@ public class MainActivity extends ActionBarActivity implements
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (id) {
+            case R.id.action_top_list:
+                newFragment = new TopListFragment();
+                replaceFragment();
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -212,6 +211,19 @@ public class MainActivity extends ActionBarActivity implements
     }
 
     @Override
+    public void onSearchItemClicked(int userId) {
+        newFragment = UserProfileFragment.newInstance(userId);
+        replaceFragment();
+        searchMenuItem.collapseActionView();
+    }
+
+    @Override
+    public void onTopListItemClicked(JSONObject post) {
+        newFragment = PostFragment.newInstance(post, false);
+        replaceFragment();
+    }
+
+    @Override
     public boolean onQueryTextSubmit(String s) {
         return false;
     }
@@ -219,12 +231,5 @@ public class MainActivity extends ActionBarActivity implements
     @Override
     public boolean onQueryTextChange(String s) {
         return false;
-    }
-
-    @Override
-    public void onSearchItemClicked(int userId) {
-
-        newFragment = UserProfileFragment.newInstance(userId);
-        replaceFragment();
     }
 }
