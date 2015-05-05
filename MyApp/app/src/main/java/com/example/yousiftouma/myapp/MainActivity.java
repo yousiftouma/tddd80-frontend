@@ -134,7 +134,7 @@ public class MainActivity extends ActionBarActivity implements
 
             for(int i = 0; i < members.size(); i++) {
                 temp[0] = i;
-                temp[1] = members.get(i); 
+                temp[1] = members.get(i);
                 cursor.addRow(temp);
             }
             final SearchView search = (SearchView) menu.findItem(R.id.search).getActionView();
