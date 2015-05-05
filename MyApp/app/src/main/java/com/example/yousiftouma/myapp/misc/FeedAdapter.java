@@ -144,7 +144,6 @@ public class FeedAdapter extends BaseAdapter {
     }
 
     public interface OnCommentButtonClickedListener {
-        // TODO: Update argument type and name
         public void onCommentClickedInFeedAdapter(JSONObject post);
     }
 

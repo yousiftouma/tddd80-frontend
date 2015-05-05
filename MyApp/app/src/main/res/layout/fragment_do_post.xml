@@ -31,7 +31,8 @@
             android:imeActionLabel="Next"
             android:singleLine="true"
             android:maxLines="1"
-            android:inputType="text"/>
+            android:inputType="textCapSentences"
+            android:maxLength="64"/>
 
         <Space
             android:layout_width="0dp"
@@ -62,7 +63,8 @@
             android:background="@drawable/textfield_layout"
             android:layout_weight=".94"
             android:imeActionLabel="Done"
-            android:maxLength="128"/>
+            android:maxLength="128"
+            android:inputType="textCapSentences|textMultiLine"/>
 
         <Space
             android:layout_width="0dp"

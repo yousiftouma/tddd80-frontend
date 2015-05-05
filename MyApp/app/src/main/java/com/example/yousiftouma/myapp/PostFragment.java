@@ -64,8 +64,6 @@ public class PostFragment extends ListFragment {
 
     private OnFragmentInteractionListener mListener;
 
-    private InputMethodManager inputMethodManager;
-
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -136,9 +134,17 @@ public class PostFragment extends ListFragment {
 
         // check if we came to fragment through comment button or through post item clicked
         if (mIsCommentHighlighted) {
-            System.out.println("came thru cmnt");
             mCommentField.requestFocus();
-            inputMethodManager.showSoftInputFromInputMethod(mCommentField.getWindowToken(), 0);
+            mCommentField.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    // issue a slight delay so keyboard can be shown when fragment is created
+                    InputMethodManager inputMethodManager = (InputMethodManager) getActivity().
+                            getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputMethodManager.showSoftInput(mCommentField, 0);
+                }
+            },50);
+
         }
         else {
             mPlayButton.requestFocus();
@@ -176,7 +182,7 @@ public class PostFragment extends ListFragment {
             @Override
             public void onClick(View v) {
                 mCommentField.requestFocus();
-                inputMethodManager = (InputMethodManager) getActivity().
+                InputMethodManager inputMethodManager = (InputMethodManager) getActivity().
                         getSystemService(Context.INPUT_METHOD_SERVICE);
                 inputMethodManager.showSoftInput(mCommentField, InputMethodManager.SHOW_FORCED);
             }
@@ -205,6 +211,8 @@ public class PostFragment extends ListFragment {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
+                    InputMethodManager inputMethodManager = (InputMethodManager) getActivity().
+                            getSystemService(Context.INPUT_METHOD_SERVICE);
                     inputMethodManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
                 }
             }
@@ -239,7 +247,6 @@ public class PostFragment extends ListFragment {
 
     }
 
-    // TODO: Make username textview change fragment to user profile
     public void onUsernamePressed(int userId) {
         if (mListener != null) {
             mListener.onPostFragmentUsernameButtonClicked(userId);

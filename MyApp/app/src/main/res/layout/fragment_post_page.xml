@@ -178,12 +178,13 @@
         android:id="@+id/comment_edittext"
         android:focusable="true"
         android:enabled="true"
-        android:inputType="text"
+        android:inputType="textCapSentences"
         android:imeActionLabel="@string/abc_action_mode_done"
         android:imeOptions="actionUnspecified"
         android:hint="@string/comment_hint"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
-        android:focusableInTouchMode="true" />
+        android:focusableInTouchMode="true"
+        />
 
 </RelativeLayout>

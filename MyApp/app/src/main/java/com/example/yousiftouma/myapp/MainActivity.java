@@ -34,6 +34,7 @@ public class MainActivity extends ActionBarActivity implements
         FeedAdapter.OnCommentButtonClickedListener,
         PostFragment.OnFragmentInteractionListener,
         FeedFragment.OnFragmentInteractionListener,
+        SearchAdapter.OnSearchItemClickedListener,
         SearchView.OnQueryTextListener{
 
     private User loggedInUser;
@@ -73,12 +74,12 @@ public class MainActivity extends ActionBarActivity implements
     private List<String> getAllMembers() {
         String url = SERVER_URL + "get_users";
         String responseAsString;
-        JSONObject responeAsJson;
+        JSONObject responseAsJson;
         members = new ArrayList<>();
         try {
             responseAsString = new DynamicAsyncTask().execute(url).get();
-            responeAsJson = new JSONObject(responseAsString);
-            JSONArray jsonArray = responeAsJson.getJSONArray("users");
+            responseAsJson = new JSONObject(responseAsString);
+            JSONArray jsonArray = responseAsJson.getJSONArray("users");
             for (int i = 0; i < jsonArray.length(); i++) {
                 members.add(jsonArray.getJSONObject(i).getString("username"));
             }
@@ -113,7 +114,6 @@ public class MainActivity extends ActionBarActivity implements
                 }
                 @Override
                 public boolean onQueryTextChange(String query) {
-                    System.out.println("memberlista: " + members);
                     loadHistory(query);
                     return true;
                 }
@@ -127,18 +127,27 @@ public class MainActivity extends ActionBarActivity implements
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 
-            String[] columns = new String[] { "_id", "text" };
-            Object[] temp = new Object[] { 0, "default" };
+            String[] columns = new String[]{"_id", "text"};
+            Object[] temp = new Object[]{0, "default"};
 
             MatrixCursor cursor = new MatrixCursor(columns);
 
-            for(int i = 0; i < members.size(); i++) {
+            // we create a temporary list of users that match current query
+            ArrayList<String> tempMembers = new ArrayList<>();
+
+            for (int i = 0; i < members.size(); i++) {
+                if (members.get(i).toLowerCase().contains(query.toLowerCase())) {
+                    tempMembers.add(members.get(i));
+                }
+            }
+
+            for (int i = 0; i < tempMembers.size(); i++) {
                 temp[0] = i;
-                temp[1] = members.get(i);
+                temp[1] = tempMembers.get(i);
                 cursor.addRow(temp);
             }
             final SearchView search = (SearchView) menu.findItem(R.id.search).getActionView();
-            search.setSuggestionsAdapter(new SearchAdapter(this, cursor, members));
+            search.setSuggestionsAdapter(new SearchAdapter(this, cursor, tempMembers));
         }
     }
 
@@ -210,5 +219,12 @@ public class MainActivity extends ActionBarActivity implements
     @Override
     public boolean onQueryTextChange(String s) {
         return false;
+    }
+
+    @Override
+    public void onSearchItemClicked(int userId) {
+
+        newFragment = UserProfileFragment.newInstance(userId);
+        replaceFragment();
     }
 }
