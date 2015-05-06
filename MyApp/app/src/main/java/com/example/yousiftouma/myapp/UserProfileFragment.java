@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.app.Fragment;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -96,24 +97,52 @@ public class UserProfileFragment extends ListFragment {
         mMostLikedPosts = (Button) view.findViewById(R.id.button_most_liked);
         mRecentPosts = (Button) view.findViewById(R.id.button_most_recent);
 
-        mRecentPosts.setPressed(true);
+        final android.os.Handler handler = new android.os.Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mRecentPosts.requestFocus();
+                mRecentPosts.performClick();
+                mRecentPosts.setPressed(true);
+            }
+        }, 1000);
 
+        mMostLikedPosts.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                v.setPressed(true);
+                v.performClick();
+                return true;
+            }
+        });
         mMostLikedPosts.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mMostLikedPosts.setPressed(true);
                 mRecentPosts.setPressed(false);
-                posts = getPostsSortedByLikes();
+                if (posts != null) {
+                    posts.clear();
+                    posts.addAll(getPostsSortedByLikes());
+                }
                 adapter.notifyDataSetChanged();
             }
         });
 
+        mRecentPosts.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                v.setPressed(true);
+                v.performClick();
+                return true;
+            }
+        });
         mRecentPosts.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mRecentPosts.setPressed(true);
                 mMostLikedPosts.setPressed(false);
-                posts = getPostsSortedByDate();
+                if (posts != null) {
+                    posts.clear();
+                    posts.addAll(getPostsSortedByDate());
+                }
                 adapter.notifyDataSetChanged();
             }
         });
@@ -161,8 +190,8 @@ public class UserProfileFragment extends ListFragment {
                 onListItemClicked(position);
             }
         });
-
-        posts = getPostsSortedByDate();
+        posts = new ArrayList<>();
+        //posts.addAll(getPostsSortedByDate());
         adapter = new FeedAdapter(getActivity(), posts);
         list.setAdapter(adapter);
 
@@ -172,7 +201,7 @@ public class UserProfileFragment extends ListFragment {
             public void run() {
                 mProgressDialog.dismiss();
             }
-        }, 3000);
+        }, 1500);
     }
 
     public void onListItemClicked(int position) {
@@ -216,7 +245,7 @@ public class UserProfileFragment extends ListFragment {
     private ArrayList<JSONObject> getPostsSortedByDate() {
         String url = MainActivity.SERVER_URL + "get_posts_by_id/"
                 + mProfileUserId;
-        posts = new ArrayList<>();
+        ArrayList<JSONObject> posts = new ArrayList<>();
         try {
             String response = new DynamicAsyncTask().execute(url).get();
             JSONObject jsonResponse = new JSONObject(response);
@@ -234,7 +263,7 @@ public class UserProfileFragment extends ListFragment {
     private ArrayList<JSONObject> getPostsSortedByLikes() {
         String url = MainActivity.SERVER_URL + "get_user_posts_ordered_by_likes/"
                 + mProfileUserId;
-        posts = new ArrayList<>();
+        ArrayList<JSONObject> posts = new ArrayList<>();
         try {
             String response = new DynamicAsyncTask().execute(url).get();
             JSONObject jsonResponse = new JSONObject(response);
