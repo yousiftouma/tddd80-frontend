@@ -104,7 +104,7 @@ public class FeedAdapter extends BaseAdapter {
             viewHolder.description.setText(post.getString("description"));
             viewHolder.numberOfLikes.setText(getNumberOfLikes(post.getInt("id")));
             viewHolder.numberOfComments.setText(getNumberOfComments(post.getInt("id")));
-            viewHolder.location.setText("Posted from " + post.getString("location"));
+            viewHolder.location.setText("Uploaded from " + post.getString("location"));
             // if post is already liked
             if (mLoggedInUser.getLikes().contains(post.getInt("id"))){
                 viewHolder.buttonLike.setImageDrawable(context.getResources()

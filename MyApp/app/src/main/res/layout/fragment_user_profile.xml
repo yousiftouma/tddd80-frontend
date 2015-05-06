@@ -103,6 +103,45 @@
         android:layout_height="1dp"
         android:layout_alignParentStart="false"
         android:layout_alignParentEnd="false"
+        android:background="@drawable/listview_item_divider"
+        android:alpha="1"
+        android:visibility="visible"
+        android:layout_below="@+id/linearLayout" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/linearLayoutTabs"
+        style="?android:attr/buttonBarStyle"
+        android:layout_below="@+id/linearLayout"
+        android:divider="@drawable/feed_button_divider"
+        android:showDividers="middle">
+
+       <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/most_recent"
+            android:id="@+id/button_most_recent"
+            android:layout_weight=".5"
+            style="?android:attr/buttonBarButtonStyle"/>
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/most_liked"
+            android:id="@+id/button_most_liked"
+            android:layout_weight=".5"
+            style="?android:attr/buttonBarButtonStyle"/>
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_alignParentStart="false"
+        android:layout_alignParentEnd="false"
         android:layout_alignTop="@android:id/list"
         android:background="@drawable/listview_item_divider"
         android:alpha="1"
@@ -112,10 +151,10 @@
         android:id="@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/linearLayout"
-        android:layout_alignParentStart="true"
         android:divider="@drawable/listview_item_divider"
-        android:dividerHeight="1px"/>
+        android:dividerHeight="1px"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/linearLayoutTabs"/>
 
 
 </RelativeLayout>

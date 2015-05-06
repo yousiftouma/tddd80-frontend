@@ -129,7 +129,7 @@ public class PostFragment extends ListFragment {
             mAuthorView.setText(mPost.getString("artist"));
             mTitleView.setText(mPost.getString("title"));
             mDescriptionView.setText(mPost.getString("description"));
-            mLocationView.setText("Posted from " + mPost.getString("location"));
+            mLocationView.setText("Uploaded from " + mPost.getString("location"));
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -241,9 +241,8 @@ public class PostFragment extends ListFragment {
         super.onActivityCreated(savedInstanceState);
         ListView listView = getListView();
         //we create one object for comments and fill it with all comments
-        //from getComments(), this so we keep the same object passed to the
-        //adapter as data set. This means notifyDataSetChanged() works when the array
-        //is updated
+        //from getComments(). Then we use manipulate using this pointer.
+        //This means notifyDataSetChanged() works when the array is updated
         comments = new ArrayList<>();
         comments.addAll(getComments());
         adapter = new CommentAdapter(getActivity(), comments);
@@ -281,7 +280,7 @@ public class PostFragment extends ListFragment {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        //comments = new ArrayList<>();
+        comments = new ArrayList<>();
         if (postId != -1) {
             url = MainActivity.SERVER_URL + "get_comments_for_post_by_id/" +
                     postId;

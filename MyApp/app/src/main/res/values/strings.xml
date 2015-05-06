@@ -12,7 +12,7 @@
 
     <string name="button_follow">Follow</string>
     <string name="button_followers">Followers</string>
-    <string name="button_likes">Likes</string>
+    <string name="button_likes">Liked posts</string>
     <string name="button_take_profile_pic">Take new profile picture</string>
     <string name="button_like">Like</string>
     <string name="button_unlike">Unlike</string>
@@ -39,5 +39,7 @@
     <string name="no_location_data_provided">No Location Data Provided</string>
     <string name="location">Location</string>
     <string name="position">pos</string>
+    <string name="most_recent">Most Recent First</string>
+    <string name="most_liked">Most Liked First</string>
 
 </resources>

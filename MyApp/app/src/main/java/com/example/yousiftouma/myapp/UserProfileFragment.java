@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -25,6 +26,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Handler;
 
 
 /**
@@ -46,6 +48,9 @@ public class UserProfileFragment extends ListFragment {
     private ImageView mProfileUserImageView;
     private ProgressDialog mProgressDialog;
     private ImageButton mFollowButton;
+    private Button mRecentPosts, mMostLikedPosts;
+
+    private FeedAdapter adapter;
 
     private ArrayList<JSONObject> posts;
 
@@ -88,6 +93,30 @@ public class UserProfileFragment extends ListFragment {
         mProfileUserNameView = (TextView) view.findViewById(R.id.profile_username_view);
         mProfileUserImageView = (ImageView) view.findViewById(R.id.profile_pic_view);
         mFollowButton = (ImageButton) view.findViewById(R.id.button_follow);
+        mMostLikedPosts = (Button) view.findViewById(R.id.button_most_liked);
+        mRecentPosts = (Button) view.findViewById(R.id.button_most_recent);
+
+        mRecentPosts.setPressed(true);
+
+        mMostLikedPosts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mMostLikedPosts.setPressed(true);
+                mRecentPosts.setPressed(false);
+                posts = getPostsSortedByLikes();
+                adapter.notifyDataSetChanged();
+            }
+        });
+
+        mRecentPosts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mRecentPosts.setPressed(true);
+                mMostLikedPosts.setPressed(false);
+                posts = getPostsSortedByDate();
+                adapter.notifyDataSetChanged();
+            }
+        });
 
         if (mProfileUserId == mLoggedInUser.getId()) {
             mFollowButton.setEnabled(false);
@@ -133,10 +162,17 @@ public class UserProfileFragment extends ListFragment {
             }
         });
 
-        ArrayList<JSONObject> posts = getPosts();
-        FeedAdapter adapter = new FeedAdapter(getActivity(), posts);
+        posts = getPostsSortedByDate();
+        adapter = new FeedAdapter(getActivity(), posts);
         list.setAdapter(adapter);
-        mProgressDialog.dismiss();
+
+        final android.os.Handler handler = new android.os.Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mProgressDialog.dismiss();
+            }
+        }, 3000);
     }
 
     public void onListItemClicked(int position) {
@@ -177,7 +213,7 @@ public class UserProfileFragment extends ListFragment {
         public void onUserProfileFeedListItemSelected(JSONObject post);
     }
 
-    private ArrayList<JSONObject> getPosts() {
+    private ArrayList<JSONObject> getPostsSortedByDate() {
         String url = MainActivity.SERVER_URL + "get_posts_by_id/"
                 + mProfileUserId;
         posts = new ArrayList<>();
@@ -185,6 +221,24 @@ public class UserProfileFragment extends ListFragment {
             String response = new DynamicAsyncTask().execute(url).get();
             JSONObject jsonResponse = new JSONObject(response);
             JSONArray jsonArray = jsonResponse.getJSONArray("posts");
+            for (int i = 0; i < jsonArray.length(); i++) {
+                posts.add(jsonArray.getJSONObject(i));
+            }
+        } catch (InterruptedException | ExecutionException | JSONException e) {
+            e.printStackTrace();
+            e.getMessage();
+        }
+        return posts;
+    }
+
+    private ArrayList<JSONObject> getPostsSortedByLikes() {
+        String url = MainActivity.SERVER_URL + "get_user_posts_ordered_by_likes/"
+                + mProfileUserId;
+        posts = new ArrayList<>();
+        try {
+            String response = new DynamicAsyncTask().execute(url).get();
+            JSONObject jsonResponse = new JSONObject(response);
+            JSONArray jsonArray = jsonResponse.getJSONArray("user_post_top_list");
             for (int i = 0; i < jsonArray.length(); i++) {
                 posts.add(jsonArray.getJSONObject(i));
             }
