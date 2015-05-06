@@ -36,6 +36,7 @@ public class TopListAdapter extends FeedAdapter {
         if (convertView == null) {
             view = mInflater.inflate(R.layout.toplist_item_layout, parent, false);
             viewHolder = new ViewHolder();
+            viewHolder.location = (TextView) view.findViewById(R.id.location);
             viewHolder.position = (TextView) view.findViewById(R.id.position);
             viewHolder.buttonLike = (ImageButton) view.findViewById(R.id.button_like);
             viewHolder.buttonComment = (Button) view.findViewById(R.id.button_comment);
@@ -66,6 +67,7 @@ public class TopListAdapter extends FeedAdapter {
             viewHolder.title.setText(post.getString("title"));
             viewHolder.description.setText(post.getString("description"));
             viewHolder.numberOfLikes.setText(getNumberOfLikes(post.getInt("id")));
+            viewHolder.location.setText(post.getString("location"));
             // if post is already liked
             if (mLoggedInUser.getLikes().contains(post.getInt("id"))){
                 viewHolder.buttonLike.setImageDrawable(context.getResources()

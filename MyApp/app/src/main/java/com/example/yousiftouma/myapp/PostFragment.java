@@ -50,7 +50,7 @@ public class PostFragment extends ListFragment {
     private JSONObject mPost;
 
     private TextView mAuthorView, mTitleView, mDescriptionView, mLikesView,
-                        mCommentsView, mSongTimeView;
+                        mCommentsView, mSongTimeView, mLocationView;
     private ImageButton mLikeButton, mPlayButton, mPauseButton, mFastForwardButton,
                             mRewindButton;
     private Button mCommentButton;
@@ -111,6 +111,7 @@ public class PostFragment extends ListFragment {
         mLikesView = (TextView) view.findViewById(R.id.likesView);
         mCommentsView = (TextView) view.findViewById(R.id.commentsView);
         mSongTimeView = (TextView) view.findViewById(R.id.songtimeView);
+        mLocationView = (TextView) view.findViewById(R.id.location);
 
         mLikeButton = (ImageButton) view.findViewById(R.id.button_like);
         mRewindButton = (ImageButton) view.findViewById(R.id.button_rewind);
@@ -128,6 +129,7 @@ public class PostFragment extends ListFragment {
             mAuthorView.setText(mPost.getString("artist"));
             mTitleView.setText(mPost.getString("title"));
             mDescriptionView.setText(mPost.getString("description"));
+            mLocationView.setText(mPost.getString("location"));
         } catch (JSONException e) {
             e.printStackTrace();
         }

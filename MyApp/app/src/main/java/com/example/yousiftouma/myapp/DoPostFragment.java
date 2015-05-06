@@ -2,14 +2,12 @@ package com.example.yousiftouma.myapp;
 
 import android.app.Activity;
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -34,6 +32,9 @@ public class DoPostFragment extends Fragment {
     private EditText mTitleView;
     private String title;
     private String description;
+    private String location = "";
+
+    private OnPostFragmentInteractionListener mListener;
 
     public DoPostFragment() {
         // Required empty public constructor
@@ -61,6 +62,7 @@ public class DoPostFragment extends Fragment {
             public void onClick(View v) {
                 title = mTitleView.getText().toString();
                 description = mDescriptionView.getText().toString();
+                onDonePressedGetAddress();
                 addNewPost();
             }
         });
@@ -100,6 +102,30 @@ public class DoPostFragment extends Fragment {
         },50);
 
         return view;
+    }
+
+    private void onDonePressedGetAddress(){
+        if (mListener != null) {
+            location = mListener.OnAddNewPostGetAddress();
+            System.out.println("loc= " + location);
+        }
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mListener = (OnPostFragmentInteractionListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement OnPostFragmentInteractionListener");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
     }
 
     private void hideKeyboard(View v) {
@@ -155,19 +181,25 @@ public class DoPostFragment extends Fragment {
             JSONObject postObj = new JSONObject();
             postObj.put("title", title);
             postObj.put("description", description);
-            postObj.put("user_id",user_id );
+            postObj.put("user_id", user_id );
             postObj.put("mediafile_path","standard");
+            postObj.put("location", location);
 
             JSONArray jsonArray = new JSONArray();
             jsonArray.put(postObj);
 
             finishedPost = new JSONObject();
             finishedPost.put("song_post", jsonArray);
-        } catch (JSONException e) {
+            System.out.println("post= " + finishedPost);
+        } catch (JSONException | NullPointerException e) {
             e.printStackTrace();
         }
         assert finishedPost != null : "jsonobject for post is null, got jsonexception";
         return finishedPost.toString();
+    }
+
+    public interface OnPostFragmentInteractionListener{
+        public String OnAddNewPostGetAddress();
     }
 
 }

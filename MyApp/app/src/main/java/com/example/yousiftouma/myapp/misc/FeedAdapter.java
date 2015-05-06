@@ -63,6 +63,7 @@ public class FeedAdapter extends BaseAdapter {
         TextView numberOfComments;
         ImageButton buttonLike;
         Button buttonComment;
+        TextView location;
     }
 
     @Override
@@ -73,6 +74,7 @@ public class FeedAdapter extends BaseAdapter {
         if (convertView == null) {
             view = mInflater.inflate(R.layout.feed_item_layout, parent, false);
             viewHolder = new ViewHolder();
+            viewHolder.location = (TextView) view.findViewById(R.id.location);
             viewHolder.buttonLike = (ImageButton) view.findViewById(R.id.button_like);
             viewHolder.buttonComment = (Button) view.findViewById(R.id.button_comment);
             viewHolder.username = (TextView) view.findViewById(R.id.username);
@@ -101,6 +103,7 @@ public class FeedAdapter extends BaseAdapter {
             viewHolder.title.setText(post.getString("title"));
             viewHolder.description.setText(post.getString("description"));
             viewHolder.numberOfLikes.setText(getNumberOfLikes(post.getInt("id")));
+            viewHolder.location.setText(post.getString("location"));
             // if post is already liked
             if (mLoggedInUser.getLikes().contains(post.getInt("id"))){
                 viewHolder.buttonLike.setImageDrawable(context.getResources()

@@ -23,8 +23,6 @@
     <string name="comment_hint">Comment…</string>
     <string name="comment">Comment</string>
 
-<!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="song_start_time">00:00</string>
     <string name="post_button_text">POST YOUR SONG</string>
     <string name="title_hint">Title</string>
@@ -32,5 +30,14 @@
     <string name="add_post">Done!</string>
     <string name="search">Find user</string>
     <string name="action_top_list">Top List</string>
+
+    <string name="service_not_available">Service Not Available</string>
+    <string name="invalid_lat_long_used">Invalid Lat or Long used</string>
+    <string name="no_address_found">No Address Found</string>
+    <string name="no_geocoder_available">No Geocoder Available</string>
+    <string name="address_found">Address Found</string>
+    <string name="no_location_data_provided">No Location Data Provided</string>
+    <string name="location">Location</string>
+    <string name="position">pos</string>
 
 </resources>
