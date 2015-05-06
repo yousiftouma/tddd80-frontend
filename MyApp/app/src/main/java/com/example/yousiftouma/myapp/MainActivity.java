@@ -50,7 +50,7 @@ public class MainActivity extends ActionBarActivity implements
         DoPostFragment.OnPostFragmentInteractionListener,
         SearchView.OnQueryTextListener,
         GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener{
+        GoogleApiClient.OnConnectionFailedListener {
 
     private User loggedInUser;
     private FragmentManager fm = getFragmentManager();
@@ -60,6 +60,9 @@ public class MainActivity extends ActionBarActivity implements
     private Menu menu;
     private MenuItem searchMenuItem;
 
+    private final Object waiter = new Object();
+    private boolean addressIsReady = false;
+
     private AddressResultReceiver mResultReceiver;
     protected boolean mAddressRequested;
     protected static final String TAG = "main";
@@ -68,7 +71,7 @@ public class MainActivity extends ActionBarActivity implements
     protected GoogleApiClient mGoogleApiClient;
     protected Location mLastLocation;
     protected String mAddressOutput;
-    protected String mLocationAddress;
+    protected String mLocationAddress = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,41 +106,35 @@ public class MainActivity extends ActionBarActivity implements
     }
 
     @Override
-    public void onSaveInstanceState(Bundle savedInstanceState){
+    public void onSaveInstanceState(Bundle savedInstanceState) {
         savedInstanceState.putBoolean(ADDRESS_REQUESTED_KEY, mAddressRequested);
         savedInstanceState.putString(LOCATION_ADDRESS_KEY, mAddressOutput);
         super.onSaveInstanceState(savedInstanceState);
     }
 
     @Override
-    protected void onStart(){
+    protected void onStart() {
         super.onStart();
         mGoogleApiClient.connect();
     }
 
     @Override
-    protected void onStop(){
+    protected void onStop() {
         super.onStop();
-        if (mGoogleApiClient.isConnected()){
+        if (mGoogleApiClient.isConnected()) {
             mGoogleApiClient.disconnect();
         }
     }
 
-    private void updateValuesFromSavedState(Bundle savedInstanceState){
-        if (savedInstanceState != null){
-            if (savedInstanceState.keySet().contains(ADDRESS_REQUESTED_KEY)){
+    private void updateValuesFromSavedState(Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            if (savedInstanceState.keySet().contains(ADDRESS_REQUESTED_KEY)) {
                 mAddressRequested = savedInstanceState.getBoolean(ADDRESS_REQUESTED_KEY);
             }
-            if (savedInstanceState.keySet().contains(LOCATION_ADDRESS_KEY)){
+            if (savedInstanceState.keySet().contains(LOCATION_ADDRESS_KEY)) {
                 mAddressOutput = savedInstanceState.getString(LOCATION_ADDRESS_KEY);
                 setAddressOutput();
             }
-        }
-    }
-
-    private void setAddressOutput() {
-        if (mLocationAddress != null) {
-            mLocationAddress = mAddressOutput;
         }
     }
 
@@ -177,11 +174,10 @@ public class MainActivity extends ActionBarActivity implements
         @Override
         protected void onReceiveResult(int resultCode, Bundle resultData) {
 
-            // Display the address string
+            // Get the address string,
             // or an error message sent from the intent service.
             mAddressOutput = resultData.getString(Constants.RESULT_DATA_KEY);
             setAddressOutput();
-
             // Show a toast message if an address was found.
             if (resultCode == Constants.SUCCESS_RESULT) {
                 showToast(getString(R.string.address_found));
@@ -214,7 +210,7 @@ public class MainActivity extends ActionBarActivity implements
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         this.menu = menu;
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 
             SearchManager manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
 
@@ -230,6 +226,7 @@ public class MainActivity extends ActionBarActivity implements
                 public boolean onQueryTextSubmit(String query) {
                     return false;
                 }
+
                 @Override
                 public boolean onQueryTextChange(String query) {
                     loadHistory(query);
@@ -243,7 +240,7 @@ public class MainActivity extends ActionBarActivity implements
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private void loadHistory(String query) {
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 
             String[] columns = new String[]{"_id", "text"};
             Object[] temp = new Object[]{0, "default"};
@@ -287,8 +284,7 @@ public class MainActivity extends ActionBarActivity implements
     public void onBackPressed() {
         if (fm.getBackStackEntryCount() != 0) {
             fm.popBackStack();
-        }
-        else {
+        } else {
             super.onBackPressed();
         }
     }
@@ -363,9 +359,14 @@ public class MainActivity extends ActionBarActivity implements
     }
 
     @Override
-    public String OnAddNewPostGetAddress() {
+    public String OnAddNewPostGetAddress() throws InterruptedException {
         startIntentService();
         return mLocationAddress;
+    }
+
+
+    private void setAddressOutput() {
+        mLocationAddress = mAddressOutput;
     }
 
     @Override

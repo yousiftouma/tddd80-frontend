@@ -106,8 +106,11 @@ public class DoPostFragment extends Fragment {
 
     private void onDonePressedGetAddress(){
         if (mListener != null) {
-            location = mListener.OnAddNewPostGetAddress();
-            System.out.println("loc= " + location);
+            try {
+                location = mListener.OnAddNewPostGetAddress();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -199,7 +202,7 @@ public class DoPostFragment extends Fragment {
     }
 
     public interface OnPostFragmentInteractionListener{
-        public String OnAddNewPostGetAddress();
+        public String OnAddNewPostGetAddress() throws InterruptedException;
     }
 
 }
