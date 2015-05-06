@@ -103,7 +103,8 @@ public class FeedAdapter extends BaseAdapter {
             viewHolder.title.setText(post.getString("title"));
             viewHolder.description.setText(post.getString("description"));
             viewHolder.numberOfLikes.setText(getNumberOfLikes(post.getInt("id")));
-            viewHolder.location.setText(post.getString("location"));
+            viewHolder.numberOfComments.setText(getNumberOfComments(post.getInt("id")));
+            viewHolder.location.setText("Posted from " + post.getString("location"));
             // if post is already liked
             if (mLoggedInUser.getLikes().contains(post.getInt("id"))){
                 viewHolder.buttonLike.setImageDrawable(context.getResources()
@@ -231,5 +232,23 @@ public class FeedAdapter extends BaseAdapter {
             e.getMessage();
         }
         return numberOfLikes;
+    }
+
+    protected String getNumberOfComments(int postId) {
+        String responseAsString;
+        JSONObject responseAsJson;
+        String numberOfComments = null;
+        try {
+            String url = MainActivity.SERVER_URL +
+                    "get_number_of_comments_for_post_by_id/"
+                    + postId;
+            responseAsString = new DynamicAsyncTask().execute(url).get();
+            responseAsJson = new JSONObject(responseAsString);
+            numberOfComments = responseAsJson.getString("number_of_comments");
+        } catch (JSONException | InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            e.getMessage();
+        }
+        return numberOfComments;
     }
 }

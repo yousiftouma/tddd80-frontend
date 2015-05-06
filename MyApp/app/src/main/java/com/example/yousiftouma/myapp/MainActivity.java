@@ -60,9 +60,6 @@ public class MainActivity extends ActionBarActivity implements
     private Menu menu;
     private MenuItem searchMenuItem;
 
-    private final Object waiter = new Object();
-    private boolean addressIsReady = false;
-
     private AddressResultReceiver mResultReceiver;
     protected boolean mAddressRequested;
     protected static final String TAG = "main";
@@ -71,7 +68,7 @@ public class MainActivity extends ActionBarActivity implements
     protected GoogleApiClient mGoogleApiClient;
     protected Location mLastLocation;
     protected String mAddressOutput;
-    protected String mLocationAddress = "";
+    protected static String mLocationAddress = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -184,6 +181,10 @@ public class MainActivity extends ActionBarActivity implements
             }
             //mAddressRequested = false;
         }
+    }
+
+    private void setAddressOutput() {
+        mLocationAddress = mAddressOutput;
     }
 
     private void showToast(String string) {
@@ -359,14 +360,9 @@ public class MainActivity extends ActionBarActivity implements
     }
 
     @Override
-    public String OnAddNewPostGetAddress() throws InterruptedException {
+    public void OnAddNewPostGetAddress() {
         startIntentService();
-        return mLocationAddress;
-    }
-
-
-    private void setAddressOutput() {
-        mLocationAddress = mAddressOutput;
+        //return mLocationAddress;
     }
 
     @Override

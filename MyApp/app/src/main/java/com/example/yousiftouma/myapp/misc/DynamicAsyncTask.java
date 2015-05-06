@@ -24,16 +24,16 @@ public class DynamicAsyncTask extends AsyncTask<String, Void, String> {
     private String response;
     private ProgressDialog pDialog;
     private String method;
-    private String JSONstring = null;
+    private String JsonString = null;
 
 
     /**
      * This constructor implies POST
-     * @param JSONstring the string to send with post
+     * @param JsonString the string to send with post
      */
-    public DynamicAsyncTask(String JSONstring) {
+    public DynamicAsyncTask(String JsonString) {
         this.method = "POST";
-        this.JSONstring = JSONstring;
+        this.JsonString = JsonString;
     }
 
     /**
@@ -57,7 +57,7 @@ public class DynamicAsyncTask extends AsyncTask<String, Void, String> {
 
             // Checking http request method type
             if (method.equals("POST")) {
-                StringEntity stringEntity = new StringEntity(JSONstring);
+                StringEntity stringEntity = new StringEntity(JsonString);
                 HttpPost httpPost = new HttpPost(url);
                 httpPost.setEntity(stringEntity);
                 // Set some headers to inform server about the type of the content

@@ -67,7 +67,8 @@ public class TopListAdapter extends FeedAdapter {
             viewHolder.title.setText(post.getString("title"));
             viewHolder.description.setText(post.getString("description"));
             viewHolder.numberOfLikes.setText(getNumberOfLikes(post.getInt("id")));
-            viewHolder.location.setText(post.getString("location"));
+            viewHolder.numberOfComments.setText(getNumberOfComments(post.getInt("id")));
+            viewHolder.location.setText("Posted from " + post.getString("location"));
             // if post is already liked
             if (mLoggedInUser.getLikes().contains(post.getInt("id"))){
                 viewHolder.buttonLike.setImageDrawable(context.getResources()

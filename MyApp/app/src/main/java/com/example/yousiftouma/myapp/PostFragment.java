@@ -129,7 +129,7 @@ public class PostFragment extends ListFragment {
             mAuthorView.setText(mPost.getString("artist"));
             mTitleView.setText(mPost.getString("title"));
             mDescriptionView.setText(mPost.getString("description"));
-            mLocationView.setText(mPost.getString("location"));
+            mLocationView.setText("Posted from " + mPost.getString("location"));
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -170,6 +170,7 @@ public class PostFragment extends ListFragment {
         }
 
         setNumberOfLikes();
+        setNumberOfComments();
 
         mLikeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -241,12 +242,12 @@ public class PostFragment extends ListFragment {
         ListView listView = getListView();
         //we create one object for comments and fill it with all comments
         //from getComments(), this so we keep the same object passed to the
-        //adapter as dataset.
+        //adapter as data set. This means notifyDataSetChanged() works when the array
+        //is updated
         comments = new ArrayList<>();
         comments.addAll(getComments());
         adapter = new CommentAdapter(getActivity(), comments);
         listView.setAdapter(adapter);
-
     }
 
     public void onUsernamePressed(int userId) {
@@ -280,7 +281,7 @@ public class PostFragment extends ListFragment {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        comments = new ArrayList<>();
+        //comments = new ArrayList<>();
         if (postId != -1) {
             url = MainActivity.SERVER_URL + "get_comments_for_post_by_id/" +
                     postId;
@@ -322,10 +323,11 @@ public class PostFragment extends ListFragment {
             case "ok":
                 System.out.println("comment made!");
                 //repopulate the list with new comment included and notify
-                //adapter of updated list
+                //adapter of updated list. Also update comment count
                 comments.clear();
                 comments.addAll(getComments());
                 adapter.notifyDataSetChanged();
+                setNumberOfComments();
                 Toast.makeText(getActivity(), "Comment added!",
                         Toast.LENGTH_LONG).show();
                 break;
@@ -435,6 +437,24 @@ public class PostFragment extends ListFragment {
             e.getMessage();
         }
         mLikesView.setText(numberOfLikes);
+    }
+
+    private void setNumberOfComments() {
+        String responseAsString;
+        JSONObject responseAsJson;
+        String numberOfComments = null;
+        try {
+            String url = MainActivity.SERVER_URL +
+                    "get_number_of_comments_for_post_by_id/"
+                    + mPost.getInt("id");
+            responseAsString = new DynamicAsyncTask().execute(url).get();
+            responseAsJson = new JSONObject(responseAsString);
+            numberOfComments = responseAsJson.getString("number_of_comments");
+        } catch (JSONException | InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            e.getMessage();
+        }
+        mCommentsView.setText(numberOfComments);
     }
 
     public interface OnFragmentInteractionListener {

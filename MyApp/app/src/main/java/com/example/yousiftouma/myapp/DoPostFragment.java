@@ -1,9 +1,11 @@
 package com.example.yousiftouma.myapp;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.os.Handler;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -60,10 +62,20 @@ public class DoPostFragment extends Fragment {
         mDoPostButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                title = mTitleView.getText().toString();
-                description = mDescriptionView.getText().toString();
-                onDonePressedGetAddress();
-                addNewPost();
+                final ProgressDialog pd = new ProgressDialog(getActivity());
+                pd.setMessage("Adding post");
+                pd.show();
+                final Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        location = MainActivity.mLocationAddress;
+                        title = mTitleView.getText().toString();
+                        description = mDescriptionView.getText().toString();
+                        addNewPost();
+                        pd.hide();
+                    }
+                }, 3000);
             }
         });
 
@@ -104,13 +116,15 @@ public class DoPostFragment extends Fragment {
         return view;
     }
 
-    private void onDonePressedGetAddress(){
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        startGettingAddress();
+    }
+
+    private void startGettingAddress(){
         if (mListener != null) {
-            try {
-                location = mListener.OnAddNewPostGetAddress();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+           mListener.OnAddNewPostGetAddress();
         }
     }
 
@@ -160,6 +174,7 @@ public class DoPostFragment extends Fragment {
             JSONObject responseAsJson;
             try {
                 responseAsString = new DynamicAsyncTask(jsonPostString).execute(url).get();
+                System.out.println("response= " + responseAsString);
                 responseAsJson = new JSONObject(responseAsString);
                 responseAsString = responseAsJson.getString("result");
             } catch (InterruptedException | ExecutionException | JSONException e) {
@@ -185,7 +200,7 @@ public class DoPostFragment extends Fragment {
             postObj.put("title", title);
             postObj.put("description", description);
             postObj.put("user_id", user_id );
-            postObj.put("mediafile_path","standard");
+            postObj.put("mediafile_path", "standard");
             postObj.put("location", location);
 
             JSONArray jsonArray = new JSONArray();
@@ -193,16 +208,16 @@ public class DoPostFragment extends Fragment {
 
             finishedPost = new JSONObject();
             finishedPost.put("song_post", jsonArray);
-            System.out.println("post= " + finishedPost);
         } catch (JSONException | NullPointerException e) {
             e.printStackTrace();
         }
         assert finishedPost != null : "jsonobject for post is null, got jsonexception";
+        System.out.println("post= " + finishedPost.toString());
         return finishedPost.toString();
     }
 
     public interface OnPostFragmentInteractionListener{
-        public String OnAddNewPostGetAddress() throws InterruptedException;
+        public void OnAddNewPostGetAddress();
     }
 
 }
