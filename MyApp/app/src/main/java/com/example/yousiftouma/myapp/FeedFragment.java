@@ -30,7 +30,7 @@ import java.util.concurrent.ExecutionException;
  * {@link FeedFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
  */
-public class FeedFragment extends ListFragment {
+public class FeedFragment extends ListFragment implements FeedAdapter.OnLikeButtonClickedListener{
 
     private ArrayList<JSONObject> posts;
     private User mLoggedInUser;
@@ -75,7 +75,7 @@ public class FeedFragment extends ListFragment {
         });
 
         ArrayList<JSONObject> posts = getPosts();
-        FeedAdapter adapter = new FeedAdapter(getActivity(), posts);
+        FeedAdapter adapter = new FeedAdapter(getActivity(), posts, this);
         list.setAdapter(adapter);
     }
 
@@ -124,6 +124,11 @@ public class FeedFragment extends ListFragment {
             e.getMessage();
         }
         return posts;
+    }
+
+    @Override
+    public void onLikeButtonClickedInAdapter() {
+        // no need to do anything as feed already updates what is necessary to update
     }
 
     /**

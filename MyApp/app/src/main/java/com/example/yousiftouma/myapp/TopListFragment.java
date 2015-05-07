@@ -111,7 +111,7 @@ public class TopListFragment extends ListFragment implements
     }
 
     @Override
-    public void onLikeButtonClickedInTopListAdapter() {
+    public void onLikeButtonClickedInAdapter() {
         //we update the order now since it may be different
         getTopListPosts();
         adapter.notifyDataSetChanged();

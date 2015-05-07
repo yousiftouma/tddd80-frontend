@@ -29,7 +29,7 @@
     <string name="description_hint">Describe your song!</string>
     <string name="add_post">Done!</string>
     <string name="search">Find user</string>
-    <string name="action_top_list">Top List</string>
+    <string name="action_top_list">Most Liked Posts</string>
 
     <string name="service_not_available">Service Not Available</string>
     <string name="invalid_lat_long_used">Invalid Lat or Long used</string>
@@ -41,5 +41,8 @@
     <string name="position">pos</string>
     <string name="most_recent">Most Recent First</string>
     <string name="most_liked">Most Liked First</string>
+    <string name="action_feed">Feed</string>
+    <string name="action_discover">Discover</string>
+    <string name="action_profile">My Profile</string>
 
 </resources>

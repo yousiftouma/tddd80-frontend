@@ -20,12 +20,10 @@ import java.util.ArrayList;
  */
 public class TopListAdapter extends FeedAdapter {
 
-    private OnLikeButtonClickedListener fragment;
 
     public TopListAdapter(Context context, ArrayList<JSONObject> posts,
                           OnLikeButtonClickedListener fragment) {
-        super(context, posts);
-        this.fragment = fragment;
+        super(context, posts, fragment);
     }
 
     @Override
@@ -96,7 +94,7 @@ public class TopListAdapter extends FeedAdapter {
                 mLoggedInUser.setLikes();
                 // run getView again for this particular row so it is updated
                 getView(position, view, parent);
-                fragment.onLikeButtonClickedInTopListAdapter();
+                fragment.onLikeButtonClickedInAdapter();
             }
         });
 
@@ -112,9 +110,6 @@ public class TopListAdapter extends FeedAdapter {
         return view;
     }
 
-    public interface OnLikeButtonClickedListener {
-        public void onLikeButtonClickedInTopListAdapter();
-    }
 }
 
 

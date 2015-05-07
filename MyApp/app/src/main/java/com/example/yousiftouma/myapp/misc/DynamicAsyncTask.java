@@ -8,6 +8,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.HTTP;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -57,7 +58,7 @@ public class DynamicAsyncTask extends AsyncTask<String, Void, String> {
 
             // Checking http request method type
             if (method.equals("POST")) {
-                StringEntity stringEntity = new StringEntity(JsonString);
+                StringEntity stringEntity = new StringEntity(JsonString, HTTP.UTF_8);
                 HttpPost httpPost = new HttpPost(url);
                 httpPost.setEntity(stringEntity);
                 // Set some headers to inform server about the type of the content

@@ -24,7 +24,6 @@
             android:layout_marginTop="15dp"
             android:id="@+id/title"
             android:hint="@string/title_hint"
-            android:gravity="top|start"
             android:textSize="28sp"
             android:background="@drawable/textfield_layout"
             android:layout_weight=".96"
@@ -58,13 +57,13 @@
             android:hint="@string/description_hint"
             android:lines="4"
             android:minLines="3"
-            android:gravity="top|start"
             android:scrollbars="none"
             android:background="@drawable/textfield_layout"
             android:layout_weight=".94"
             android:imeActionLabel="Done"
             android:maxLength="128"
-            android:inputType="textCapSentences|textMultiLine"/>
+            android:inputType="textCapSentences|textMultiLine"
+            android:gravity="top" />
 
         <Space
             android:layout_width="0dp"
@@ -80,7 +79,7 @@
             android:layout_width="fill_parent"
             android:layout_height="75dp"
             android:text="@string/add_post"
-            android:textColor="#ff2faeff"
+            android:textColor="#ff557cff"
             style="?android:attr/buttonBarButtonStyle"
             android:id="@+id/button_do_post"
             android:textSize="32sp"

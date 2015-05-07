@@ -27,18 +27,18 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Handler;
 
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link UserProfileFragment.OnFragmentInteractionListener} interface
+ * {@link com.example.yousiftouma.myapp.UserProfileFragment.OnUserProfileFragmentInteractionListener} interface
  * to handle interaction events.
  * Use the {@link UserProfileFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class UserProfileFragment extends ListFragment {
+public class UserProfileFragment extends ListFragment implements
+        FeedAdapter.OnLikeButtonClickedListener{
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String PROFILE_USER = "profile_user";
 
@@ -55,7 +55,7 @@ public class UserProfileFragment extends ListFragment {
 
     private ArrayList<JSONObject> posts;
 
-    private OnFragmentInteractionListener mListener;
+    private OnUserProfileFragmentInteractionListener mListener;
 
     /**
      * Use this factory method to create a new instance of
@@ -191,8 +191,7 @@ public class UserProfileFragment extends ListFragment {
             }
         });
         posts = new ArrayList<>();
-        //posts.addAll(getPostsSortedByDate());
-        adapter = new FeedAdapter(getActivity(), posts);
+        adapter = new FeedAdapter(getActivity(), posts, this);
         list.setAdapter(adapter);
 
         final android.os.Handler handler = new android.os.Handler();
@@ -214,7 +213,7 @@ public class UserProfileFragment extends ListFragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            mListener = (OnFragmentInteractionListener) activity;
+            mListener = (OnUserProfileFragmentInteractionListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -228,17 +227,19 @@ public class UserProfileFragment extends ListFragment {
     }
 
     /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
+     * adapter has notified us that a like was performed and we should sorth
+     * the list again accordingly
      */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
+    @Override
+    public void onLikeButtonClickedInAdapter() {
+        if (mMostLikedPosts.isPressed() && (posts != null)) {
+            posts.clear();
+            posts.addAll(getPostsSortedByLikes());
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+    public interface OnUserProfileFragmentInteractionListener {
         public void onUserProfileFeedListItemSelected(JSONObject post);
     }
 

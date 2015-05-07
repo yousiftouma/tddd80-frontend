@@ -30,13 +30,16 @@ public class FeedAdapter extends BaseAdapter {
     protected Context context;
     protected JSONObject post;
     protected ViewHolder viewHolder;
+    protected OnLikeButtonClickedListener fragment;
     protected User mLoggedInUser = User.getInstance();
 
-    public FeedAdapter(Context context, ArrayList<JSONObject> posts) {
+    public FeedAdapter(Context context, ArrayList<JSONObject> posts,
+                       OnLikeButtonClickedListener fragment) {
         super();
         this.posts = posts;
         this.mInflater = LayoutInflater.from(context);
         this.context = context;
+        this.fragment = fragment;
     }
 
     @Override
@@ -132,6 +135,7 @@ public class FeedAdapter extends BaseAdapter {
                 mLoggedInUser.setLikes();
                 // run getView again for this particular row so it is updated
                 getView(position, view, parent);
+                fragment.onLikeButtonClickedInAdapter();
             }
         });
 
@@ -145,6 +149,10 @@ public class FeedAdapter extends BaseAdapter {
         });
 
         return view;
+    }
+
+    public interface OnLikeButtonClickedListener {
+        public void onLikeButtonClickedInAdapter();
     }
 
     public interface OnCommentButtonClickedListener {

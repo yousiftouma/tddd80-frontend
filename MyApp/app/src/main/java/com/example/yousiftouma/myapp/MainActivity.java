@@ -41,7 +41,7 @@ import java.util.concurrent.ExecutionException;
 
 
 public class MainActivity extends ActionBarActivity implements
-        UserProfileFragment.OnFragmentInteractionListener,
+        UserProfileFragment.OnUserProfileFragmentInteractionListener,
         FeedAdapter.OnCommentButtonClickedListener,
         PostFragment.OnFragmentInteractionListener,
         FeedFragment.OnFragmentInteractionListener,
@@ -52,7 +52,7 @@ public class MainActivity extends ActionBarActivity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
-    private User loggedInUser;
+    private User mLoggedInUser;
     private FragmentManager fm = getFragmentManager();
     private Fragment newFragment;
     public static String SERVER_URL = "http://mytestapp-youto814.openshift.ida.liu.se/";
@@ -74,7 +74,7 @@ public class MainActivity extends ActionBarActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        loggedInUser = User.getInstance();
+        mLoggedInUser = User.getInstance();
 
         mResultReceiver = new AddressResultReceiver(new Handler());
 
@@ -277,6 +277,18 @@ public class MainActivity extends ActionBarActivity implements
             case R.id.action_top_list:
                 newFragment = new TopListFragment();
                 replaceFragment();
+                break;
+            case R.id.action_discover:
+                //TODO: change to discover fragment
+                break;
+            case R.id.action_feed:
+                newFragment = new FeedFragment();
+                replaceFragment();
+                break;
+            case R.id.action_profile:
+                newFragment = UserProfileFragment.newInstance(mLoggedInUser.getId());
+                replaceFragment();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -362,7 +374,6 @@ public class MainActivity extends ActionBarActivity implements
     @Override
     public void OnAddNewPostGetAddress() {
         startIntentService();
-        //return mLocationAddress;
     }
 
     @Override
