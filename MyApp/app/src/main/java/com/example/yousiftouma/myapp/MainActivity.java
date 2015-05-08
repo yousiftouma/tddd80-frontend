@@ -1,6 +1,7 @@
 package com.example.yousiftouma.myapp;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.SearchManager;
@@ -19,6 +20,8 @@ import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.example.yousiftouma.myapp.misc.Constants;
@@ -267,15 +270,29 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
+    private void hideKeyboard() {
+        if (getCurrentFocus() != null) {
+            InputMethodManager inputMethodManager = (InputMethodManager)
+                    getSystemService(Activity.INPUT_METHOD_SERVICE);
+            inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        }
+    }
+
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+        hideKeyboard();
         switch (id) {
             case R.id.action_top_list:
                 newFragment = new TopListFragment();
+                replaceFragment();
+                break;
+            case R.id.action_do_post:
+                newFragment = new DoPostFragment();
                 replaceFragment();
                 break;
             case R.id.action_discover:
@@ -289,8 +306,19 @@ public class MainActivity extends ActionBarActivity implements
                 newFragment = UserProfileFragment.newInstance(mLoggedInUser.getId());
                 replaceFragment();
                 break;
+            case R.id.action_logout:
+                mLoggedInUser.clearInfo();
+                fm.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                logOutUser();
+                break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void logOutUser(){
+        Intent logOutIntent = new Intent(this, LoginActivity.class);
+        startActivity(logOutIntent);
+        finish();
     }
 
     @Override

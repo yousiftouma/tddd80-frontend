@@ -41,8 +41,10 @@
     <string name="position">pos</string>
     <string name="most_recent">Most Recent First</string>
     <string name="most_liked">Most Liked First</string>
-    <string name="action_feed">Feed</string>
+    <string name="action_feed">My Feed</string>
     <string name="action_discover">Discover</string>
     <string name="action_profile">My Profile</string>
+    <string name="action_logout">Log Out</string>
+    <string name="action_do_post">Post A Song</string>
 
 </resources>

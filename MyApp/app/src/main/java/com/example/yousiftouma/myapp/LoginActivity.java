@@ -122,6 +122,27 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         startActivity(mainAppIntent);
     }
 
+    /**
+     * clear fields if navigating back
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+        mEmailView.setText("");
+        mPasswordView.setText("");
+    }
+
+    /**
+     * Exit app if pressing back
+     */
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
+
     private void populateAutoComplete() {
         getLoaderManager().initLoader(0, null, this);
     }

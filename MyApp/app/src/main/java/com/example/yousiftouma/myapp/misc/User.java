@@ -37,6 +37,10 @@ public class User {
         return UserHolder.INSTANCE;
     }
 
+    /**
+     * Sets user details to be used in app
+     * @param userData Json object with required data
+     */
     public void setInfo(JSONObject userData){
         try {
             id = userData.getInt("id");
@@ -50,6 +54,18 @@ public class User {
             e.printStackTrace();
             e.getMessage();
         }
+    }
+
+    /**
+     * clears info, used when logging out
+     */
+    public void clearInfo() {
+        id = -1;
+        profilePic = null;
+        username = null;
+        email = null;
+        likes.clear();
+        follows.clear();
     }
 
     private ArrayList<Integer> allLikesByUser() {
