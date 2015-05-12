@@ -4,6 +4,10 @@ import android.app.Activity;
 import android.app.ListFragment;
 import android.content.Context;
 import android.graphics.Color;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.support.annotation.NonNull;
@@ -30,6 +34,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
 
@@ -45,9 +50,11 @@ public class PostFragment extends ListFragment {
 
     private static final String POST = "post";
     private static final String IS_COMMENT_HIGHLIGHTED = "is_comment_highlighted";
+    private static final String IS_DICOVER_MODE = "is_discover_mode";
 
     private boolean mIsCommentHighlighted;
     private JSONObject mPost;
+    private boolean mIsDiscoverMode;
 
     private TextView mAuthorView, mTitleView, mDescriptionView, mLikesView,
                         mCommentsView, mSongTimeView, mLocationView;
@@ -62,21 +69,45 @@ public class PostFragment extends ListFragment {
     private ArrayList<JSONObject> comments;
     private CommentAdapter adapter;
 
+    private ArrayList<JSONObject> postsNotSeenYet;
+    private int latestShownPost = -1;
+
+    private SensorManager mSensorManager;
+    private float mAccel; // acceleration apart from gravity
+    private float mAccelCurrent; // current acceleration including gravity
+    private float mAccelLast; // last acceleration including gravity
+
+    private SensorEventListener mSensorListener = null;
+
+
     private OnFragmentInteractionListener mListener;
 
     /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param post JSONObject post to display
-     * @param isCommentHighlighted If comment field should be highlighted
-     * @return A new instance of fragment PostFragment.
+     * factory method for postfragment without discover mode
+     * @param post post to show
+     * @param isCommentHighlighted if came through comment
+     * @return new fragment
      */
     public static PostFragment newInstance(JSONObject post, boolean isCommentHighlighted) {
         PostFragment fragment = new PostFragment();
         Bundle args = new Bundle();
         args.putString(POST, post.toString());
         args.putBoolean(IS_COMMENT_HIGHLIGHTED, isCommentHighlighted);
+        args.putBoolean(IS_DICOVER_MODE, false);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    /**
+     * factory method when using postfragment for discover mode
+     * @return new fragment
+     */
+    public static PostFragment newInstance(){
+        PostFragment fragment = new PostFragment();
+        Bundle args = new Bundle();
+        args.putString(POST, null);
+        args.putBoolean(IS_COMMENT_HIGHLIGHTED, false);
+        args.putBoolean(IS_DICOVER_MODE, true);
         fragment.setArguments(args);
         return fragment;
     }
@@ -90,12 +121,59 @@ public class PostFragment extends ListFragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mIsCommentHighlighted = getArguments().getBoolean(IS_COMMENT_HIGHLIGHTED);
-            try {
-                mPost = new JSONObject(getArguments().getString(POST));
-            } catch (JSONException e) {
-                e.printStackTrace();
+            mIsDiscoverMode = getArguments().getBoolean(IS_DICOVER_MODE);
+            // only assign post if not discover mode, otherwise redundant
+            if (!mIsDiscoverMode) {
+                try {
+                    mPost = new JSONObject(getArguments().getString(POST));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                activateShakeSensor();
+                mPost = getRandomPost();
+                Toast.makeText(getActivity().getApplicationContext(),
+                        getResources().getString(R.string.shake_for_post),
+                        Toast.LENGTH_SHORT).show();
             }
         }
+
+        mSensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
+        mSensorManager.registerListener(mSensorListener,
+                mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                SensorManager.SENSOR_DELAY_NORMAL);
+        mAccel = 0.00f;
+        mAccelCurrent = SensorManager.GRAVITY_EARTH;
+        mAccelLast = SensorManager.GRAVITY_EARTH;
+    }
+
+    private void activateShakeSensor() {
+        mSensorListener = new SensorEventListener() {
+
+            public void onSensorChanged(SensorEvent se) {
+                float x = se.values[0];
+                float y = se.values[1];
+                float z = se.values[2];
+                mAccelLast = mAccelCurrent;
+                mAccelCurrent = (float) Math.sqrt((double) (x*x + y*y + z*z));
+                float delta = mAccelCurrent - mAccelLast;
+                mAccel = mAccel * 0.9f + delta; // perform low-cut filter
+                if (mAccel > 6 && mIsDiscoverMode) {
+                    Toast.makeText(getActivity().getApplicationContext(), getResources().
+                                    getString(R.string.new_post_retrieved),
+                            Toast.LENGTH_SHORT).show();
+                    mPost = showRandomPost();
+                    setPostData();
+                    comments.clear();
+                    comments.addAll(getComments());
+                    adapter.notifyDataSetChanged();
+                    mAccel = 0;
+                }
+            }
+
+            public void onAccuracyChanged(Sensor sensor, int accuracy) {
+            }
+        };
     }
 
     @Override
@@ -125,14 +203,7 @@ public class PostFragment extends ListFragment {
 
         mCommentField = (EditText) view.findViewById(R.id.comment_edittext);
 
-        try {
-            mAuthorView.setText(mPost.getString("artist"));
-            mTitleView.setText(mPost.getString("title"));
-            mDescriptionView.setText(mPost.getString("description"));
-            mLocationView.setText("Uploaded from " + mPost.getString("location"));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        setPostData();
 
         // check if we came to fragment through comment button or through post item clicked
         if (mIsCommentHighlighted) {
@@ -151,26 +222,6 @@ public class PostFragment extends ListFragment {
         else {
             mPlayButton.requestFocus();
         }
-
-        try {
-            // check if post is liked, to know what button to display
-            if (mLoggedInUser.getLikes().contains(mPost.getInt("id"))){
-                mLikeButton.setImageDrawable(getResources()
-                        .getDrawable(R.mipmap.liked_50));
-                mLikeButton.setTag(R.id.like_status, "unlike");
-            }
-            // else post is not liked, our "default"
-            else {
-                mLikeButton.setImageDrawable(getResources()
-                        .getDrawable(R.mipmap.not_liked_50));
-                mLikeButton.setTag(R.id.like_status, "like");
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        setNumberOfLikes();
-        setNumberOfComments();
 
         mLikeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -236,6 +287,32 @@ public class PostFragment extends ListFragment {
         return view;
     }
 
+    private void setPostData() {
+        try {
+            mAuthorView.setText(mPost.getString("artist"));
+            mTitleView.setText(mPost.getString("title"));
+            mDescriptionView.setText(mPost.getString("description"));
+            mLocationView.setText("Uploaded from " + mPost.getString("location"));
+
+            // check if post is liked, to know what button to display
+            if (mLoggedInUser.getLikes().contains(mPost.getInt("id"))){
+                mLikeButton.setImageDrawable(getResources()
+                        .getDrawable(R.mipmap.liked_50));
+                mLikeButton.setTag(R.id.like_status, "unlike");
+            }
+            // else post is not liked, our "default"
+            else {
+                mLikeButton.setImageDrawable(getResources()
+                        .getDrawable(R.mipmap.not_liked_50));
+                mLikeButton.setTag(R.id.like_status, "like");
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        setNumberOfLikes();
+        setNumberOfComments();
+    }
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -271,6 +348,20 @@ public class PostFragment extends ListFragment {
         super.onDetach();
         mListener = null;
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mSensorManager.registerListener(mSensorListener, mSensorManager.
+                getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    @Override
+    public void onPause() {
+        mSensorManager.unregisterListener(mSensorListener);
+        super.onPause();
+    }
+
 
     private ArrayList<JSONObject> getComments() {
         int postId = -1;
@@ -454,6 +545,63 @@ public class PostFragment extends ListFragment {
             e.getMessage();
         }
         mCommentsView.setText(numberOfComments);
+    }
+
+    private JSONObject getRandomPost() {
+        String url = MainActivity.SERVER_URL + "get_discover_posts/" + mLoggedInUser.getId();
+        String responseAsString;
+        JSONObject responseAsJson;
+        Random rand = new Random();
+        JSONObject post = null;
+        int curr_post_id;
+        int index;
+        try {
+            responseAsString = new DynamicAsyncTask().execute(url).get();
+            responseAsJson = new JSONObject(responseAsString);
+            JSONArray jsonArray = responseAsJson.getJSONArray("posts");
+
+            index = rand.nextInt(jsonArray.length());
+            post = jsonArray.getJSONObject(index);
+            curr_post_id = post.getInt("id");
+            while (curr_post_id == latestShownPost) {
+                index = rand.nextInt(jsonArray.length());
+                post = jsonArray.getJSONObject(index);
+                curr_post_id = post.getInt("id");
+            }
+
+            latestShownPost = curr_post_id;
+
+              // add all posts that we can see in discover mode in a list
+              // and remove the one we are showing
+            postsNotSeenYet = new ArrayList<>();
+            for (int i = 0; i < jsonArray.length(); i++) {
+                if (i != index) {
+                    postsNotSeenYet.add(jsonArray.getJSONObject(i));
+                }
+            }
+        } catch (InterruptedException | JSONException | ExecutionException e) {
+            e.printStackTrace();
+            e.getMessage();
+        }
+        return post;
+    }
+
+    private JSONObject showRandomPost() {
+        Random rand = new Random();
+        JSONObject post;
+        if (!postsNotSeenYet.isEmpty()){
+            int index = rand.nextInt(postsNotSeenYet.size());
+            post = postsNotSeenYet.get(index);
+            postsNotSeenYet.remove(index);
+            try {
+                latestShownPost = post.getInt("id");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else {
+            return getRandomPost();
+        }
+        return post;
     }
 
     public interface OnFragmentInteractionListener {

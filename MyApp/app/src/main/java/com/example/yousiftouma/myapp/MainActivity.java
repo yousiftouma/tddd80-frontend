@@ -296,7 +296,8 @@ public class MainActivity extends ActionBarActivity implements
                 replaceFragment();
                 break;
             case R.id.action_discover:
-                //TODO: change to discover fragment
+                newFragment = PostFragment.newInstance();
+                replaceFragment();
                 break;
             case R.id.action_feed:
                 newFragment = new FeedFragment();

@@ -46,5 +46,7 @@
     <string name="action_profile">My Profile</string>
     <string name="action_logout">Log Out</string>
     <string name="action_do_post">Post A Song</string>
+    <string name="new_post_retrieved">Check this post out!</string>
+    <string name="shake_for_post">Shake to get a new song!</string>
 
 </resources>
