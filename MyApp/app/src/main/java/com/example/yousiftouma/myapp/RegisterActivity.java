@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 
@@ -92,7 +91,7 @@ public class RegisterActivity extends Activity implements LoaderManager.LoaderCa
         private final String mEmail;
         private final String mPassword;
         private JSONObject jsonResponse;
-        private String errortype;
+        private String errorType;
 
         UserRegisterTask(String username, String password, String email) {
             mEmail = email;
@@ -102,11 +101,9 @@ public class RegisterActivity extends Activity implements LoaderManager.LoaderCa
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
             try {
-                // Simulate network access.
-                Thread.sleep(2000);
+                // Simulate network access, nice for user feedback
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 return false;
             }
@@ -130,13 +127,13 @@ public class RegisterActivity extends Activity implements LoaderManager.LoaderCa
                 case "ok":
                     return true;
                 case "username taken":
-                    errortype = "username";
+                    errorType = "username";
                     return false;
                 case "email taken":
-                    errortype = "email";
+                    errorType = "email";
                     return false;
                 default:
-                    errortype = "unknown";
+                    errorType = "unknown";
                     return false;
             }
         }
@@ -151,7 +148,7 @@ public class RegisterActivity extends Activity implements LoaderManager.LoaderCa
                 Toast.makeText(getApplicationContext(),
                         getString(R.string.success_register), Toast.LENGTH_LONG).show();
             } else {
-                switch (errortype) {
+                switch (errorType) {
                     case "username":
                         mUsernameView.setError(getString(R.string.error_username_taken));
                         mUsernameView.requestFocus();
@@ -174,6 +171,13 @@ public class RegisterActivity extends Activity implements LoaderManager.LoaderCa
         }
     }
 
+    /**
+     * does network call with a post parameter
+     * @param username username to put in post object
+     * @param password password to put in post object
+     * @param email email to put in post object
+     * @return string response from server
+     */
     public static String POST(String username, String password, String email){
         InputStream inputStream = null;
         String result = "";
@@ -220,6 +224,13 @@ public class RegisterActivity extends Activity implements LoaderManager.LoaderCa
         return result;
     }
 
+    /**
+     * converts a inputStream to string by reading and appending while there is
+     * something to read
+     * @param inputStream the InputStream to read from
+     * @return string result
+     * @throws IOException
+     */
     private static String convertInputStreamToString(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
         String line = "";
@@ -252,7 +263,7 @@ public class RegisterActivity extends Activity implements LoaderManager.LoaderCa
         String username = mUsernameView.getText().toString();
         String email = mEmailView.getText().toString();
         String password = mPasswordView.getText().toString();
-        String passwordconfirm = mPasswordConfirmView.getText().toString();
+        String passwordConfirm = mPasswordConfirmView.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
@@ -274,7 +285,7 @@ public class RegisterActivity extends Activity implements LoaderManager.LoaderCa
             focusView = mPasswordView;
             cancel = true;
         }
-        if (!isConfirmPasswordValid(password, passwordconfirm)) {
+        if (!isConfirmPasswordValid(password, passwordConfirm)) {
             mPasswordConfirmView.setError(getString(R.string.error_passwords_not_matching));
             focusView = mPasswordConfirmView;
             cancel = true;
@@ -304,6 +315,7 @@ public class RegisterActivity extends Activity implements LoaderManager.LoaderCa
         }
     }
 
+    // some methods to check if the fields match our notion of validity
     private boolean isUsernameValid(String username) {
         return username.length() > 1 && username.length() < 32;
     }

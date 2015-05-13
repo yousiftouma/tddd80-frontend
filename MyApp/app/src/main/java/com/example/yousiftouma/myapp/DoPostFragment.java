@@ -17,8 +17,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.yousiftouma.myapp.misc.DynamicAsyncTask;
-import com.example.yousiftouma.myapp.misc.User;
+import com.example.yousiftouma.myapp.helperclasses.DynamicAsyncTask;
+import com.example.yousiftouma.myapp.helperclasses.User;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -195,6 +195,9 @@ public class DoPostFragment extends Fragment {
     private String createJsonForPost() {
         int user_id = mLoggedInUser.getId();
         JSONObject finishedPost = null;
+        if (location.equals("No Location Data Provided")) {
+            location = "Unknown Location";
+        }
         try {
             JSONObject postObj = new JSONObject();
             postObj.put("title", title);

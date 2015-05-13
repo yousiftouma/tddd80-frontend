@@ -28,7 +28,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.yousiftouma.myapp.misc.User;
+import com.example.yousiftouma.myapp.helperclasses.User;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -123,7 +123,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     }
 
     /**
-     * clear fields if navigating back
+     * clear fields if navigating back to this activity
      */
     @Override
     public void onResume() {
@@ -133,7 +133,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     }
 
     /**
-     * Exit app if pressing back
+     * Exit app if pressing back in this activity
      */
     @Override
     public void onBackPressed() {
@@ -321,16 +321,14 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
             try {
-                // Simulate network access.
-                Thread.sleep(2000);
+                // Simulate network access, nice for user feedback
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 return false;
             }
 
-            //check email, if ok, check password, else set email error.
+            // check email, if ok, check password, else set email error.
             // if ok, login, else set password error
             String responseString = GET(mEmail);
             try {
@@ -392,6 +390,11 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         }
     }
 
+    /**
+     * does network call and gets user data
+     * @param email to get data with
+     * @return result from server
+     */
     public static String GET(String email){
         InputStream inputStream;
         String result = "";
@@ -411,6 +414,13 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         return result;
     }
 
+    /**
+     * converts a inputStream to string by reading and appending while there is
+     * something to read
+     * @param inputStream the InputStream to read from
+     * @return string result
+     * @throws IOException
+     */
     private static String convertInputStreamToString(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
         String line;

@@ -1,4 +1,4 @@
-package com.example.yousiftouma.myapp.misc;
+package com.example.yousiftouma.myapp.helperclasses;
 
 import android.app.IntentService;
 import android.content.Intent;
@@ -7,18 +7,18 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.ResultReceiver;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.example.yousiftouma.myapp.R;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 /**
- * Gets address
+ * Asynchronously handles an intent using a worker thread. Receives a ResultReceiver object and a
+ * location through an intent. Tries to fetch the address for the location using a Geocoder, and
+ * sends the result to the ResultReceiver.
  */
 public class FetchAddressIntentService extends IntentService {
 
@@ -26,6 +26,7 @@ public class FetchAddressIntentService extends IntentService {
     private static final String TAG = "fetch-intent-service";
 
     public FetchAddressIntentService() {
+        // Use the TAG to name the worker thread.
         super(TAG);
     }
 
@@ -33,14 +34,21 @@ public class FetchAddressIntentService extends IntentService {
         Bundle bundle = new Bundle();
         bundle.putString(Constants.RESULT_DATA_KEY, message);
         mReceiver.send(resultCode, bundle);
-
     }
 
+    /**
+     * Tries to get the location address using a Geocoder. If successful, sends an address to a
+     * result receiver. If unsuccessful, sends an error message instead.
+     *
+     * This service calls this method from the default worker thread with the intent that started
+     * the service. When this method returns, the service automatically stops.
+     */
     protected void onHandleIntent(Intent intent){
         String errorMessage = "";
 
         mReceiver = intent.getParcelableExtra(Constants.RECEIVER);
 
+        // Check if receiver was properly registered.
         if (mReceiver == null){
             Log.wtf(TAG, "No receiver received");
             return;
@@ -50,6 +58,8 @@ public class FetchAddressIntentService extends IntentService {
         Location location = intent.getParcelableExtra(
                 Constants.LOCATION_DATA_EXTRA);
 
+        // Make sure that the location data was really sent over through an extra. If it wasn't,
+        // send an error error message and return.
         if (location == null){
             errorMessage = getString(R.string.no_location_data_provided);
             Log.wtf(TAG, errorMessage);
@@ -61,10 +71,11 @@ public class FetchAddressIntentService extends IntentService {
         List<Address> addresses = null;
 
         try {
+            // Using getFromLocation() returns an array of Addresses near this lat/long
+            // we specify we want only the first address
             addresses = geocoder.getFromLocation(
                     location.getLatitude(),
                     location.getLongitude(),
-                    // In this sample, get just a single address.
                     1);
         } catch (IOException ioException) {
             // Catch network or other I/O problems.
@@ -87,6 +98,8 @@ public class FetchAddressIntentService extends IntentService {
             }
             deliverResultToReceiver(Constants.FAILURE_RESULT, errorMessage);
         } else {
+            // we format the address as we want it, getting only city and country
+            // and return this string to the ResultReceiver
             Address address = addresses.get(0);
             String finalizedAddress = address.getLocality() + ", " + address.getCountryName();
 

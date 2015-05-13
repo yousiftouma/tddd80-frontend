@@ -12,9 +12,9 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 
-import com.example.yousiftouma.myapp.misc.DynamicAsyncTask;
-import com.example.yousiftouma.myapp.misc.FeedAdapter;
-import com.example.yousiftouma.myapp.misc.User;
+import com.example.yousiftouma.myapp.helperclasses.DynamicAsyncTask;
+import com.example.yousiftouma.myapp.helperclasses.FeedAdapter;
+import com.example.yousiftouma.myapp.helperclasses.User;
 
 import org.json.JSONArray;
 import org.json.JSONException;

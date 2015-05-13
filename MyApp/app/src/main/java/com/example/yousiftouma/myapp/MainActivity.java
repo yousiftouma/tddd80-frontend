@@ -20,16 +20,15 @@ import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
-import com.example.yousiftouma.myapp.misc.Constants;
-import com.example.yousiftouma.myapp.misc.DynamicAsyncTask;
-import com.example.yousiftouma.myapp.misc.FeedAdapter;
-import com.example.yousiftouma.myapp.misc.FetchAddressIntentService;
-import com.example.yousiftouma.myapp.misc.SearchAdapter;
-import com.example.yousiftouma.myapp.misc.User;
+import com.example.yousiftouma.myapp.helperclasses.Constants;
+import com.example.yousiftouma.myapp.helperclasses.DynamicAsyncTask;
+import com.example.yousiftouma.myapp.helperclasses.FeedAdapter;
+import com.example.yousiftouma.myapp.helperclasses.FetchAddressIntentService;
+import com.example.yousiftouma.myapp.helperclasses.SearchAdapter;
+import com.example.yousiftouma.myapp.helperclasses.User;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -42,7 +41,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-
+/**
+ * our main activity to keep hold of fragments and switch between them
+ * in the actual app
+ */
 public class MainActivity extends ActionBarActivity implements
         UserProfileFragment.OnUserProfileFragmentInteractionListener,
         FeedAdapter.OnCommentButtonClickedListener,
@@ -59,10 +61,13 @@ public class MainActivity extends ActionBarActivity implements
     private FragmentManager fm = getFragmentManager();
     private Fragment newFragment;
     public static String SERVER_URL = "http://mytestapp-youto814.openshift.ida.liu.se/";
+
     private List<String> users = getAllUsers();
+
     private Menu menu;
     private MenuItem searchMenuItem;
 
+    // fields related to our address service
     private AddressResultReceiver mResultReceiver;
     protected boolean mAddressRequested;
     protected static final String TAG = "main";
@@ -77,6 +82,7 @@ public class MainActivity extends ActionBarActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         mLoggedInUser = User.getInstance();
 
         mResultReceiver = new AddressResultReceiver(new Handler());
@@ -105,6 +111,10 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
+    /**
+     * when we need to save state
+     * @param savedInstanceState bundle with info for the state
+     */
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         savedInstanceState.putBoolean(ADDRESS_REQUESTED_KEY, mAddressRequested);
@@ -126,6 +136,9 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
+    /**
+     * retrieve values from the saved state
+     */
     private void updateValuesFromSavedState(Bundle savedInstanceState) {
         if (savedInstanceState != null) {
             if (savedInstanceState.keySet().contains(ADDRESS_REQUESTED_KEY)) {
@@ -182,7 +195,6 @@ public class MainActivity extends ActionBarActivity implements
             if (resultCode == Constants.SUCCESS_RESULT) {
                 showToast(getString(R.string.address_found));
             }
-            //mAddressRequested = false;
         }
     }
 
@@ -194,6 +206,9 @@ public class MainActivity extends ActionBarActivity implements
         Toast.makeText(this, string, Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * init the fetch address intent
+     */
     protected void startIntentService() {
         Intent intent = new Intent(this, FetchAddressIntentService.class);
         intent.putExtra(Constants.RECEIVER, mResultReceiver);
@@ -209,6 +224,9 @@ public class MainActivity extends ActionBarActivity implements
                 .build();
     }
 
+    /**
+     * creates the menu bar and init the search field
+     */
     @Override
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -241,6 +259,9 @@ public class MainActivity extends ActionBarActivity implements
         return true;
     }
 
+    /**
+     * makes sure the list is updated when updating search query
+     */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private void loadHistory(String query) {
 
@@ -254,6 +275,8 @@ public class MainActivity extends ActionBarActivity implements
             // we create a temporary list of users that match current query
             ArrayList<String> tempMembers = new ArrayList<>();
 
+            // normalize input with data to match even if you type lowercase and name
+            // is uppercase
             for (int i = 0; i < users.size(); i++) {
                 if (users.get(i).toLowerCase().contains(query.toLowerCase())) {
                     tempMembers.add(users.get(i));
@@ -331,25 +354,32 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
+    /**
+     * returns a list of all users
+     */
     private List<String> getAllUsers() {
         String url = SERVER_URL + "get_users";
         String responseAsString;
         JSONObject responseAsJson;
-        users = new ArrayList<>();
+        ArrayList<String> usernames = new ArrayList<>();
         try {
             responseAsString = new DynamicAsyncTask().execute(url).get();
             responseAsJson = new JSONObject(responseAsString);
             JSONArray jsonArray = responseAsJson.getJSONArray("users");
             for (int i = 0; i < jsonArray.length(); i++) {
-                users.add(jsonArray.getJSONObject(i).getString("username"));
+                usernames.add(jsonArray.getJSONObject(i).getString("username"));
             }
         } catch (InterruptedException | JSONException | ExecutionException e) {
             e.printStackTrace();
             e.getMessage();
         }
-        return users;
+        return usernames;
     }
 
+    /**
+     * add the current newFragment to the fragment container and pushes current
+     * fragment to BackStack
+     */
     private void replaceFragment() {
         fm.beginTransaction()
                 .replace(R.id.fragment_container, newFragment).addToBackStack(null).commit();

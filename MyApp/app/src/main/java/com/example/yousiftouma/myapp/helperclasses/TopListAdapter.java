@@ -1,7 +1,6 @@
-package com.example.yousiftouma.myapp.misc;
+package com.example.yousiftouma.myapp.helperclasses;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -16,7 +15,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 /**
- * Populates top list of posts
+ * Populates top list of posts, extends FeedAdapter because of the similarity
+ * refer to FeedAdapter for more docs and comments
  */
 public class TopListAdapter extends FeedAdapter {
 
@@ -35,6 +35,7 @@ public class TopListAdapter extends FeedAdapter {
             view = mInflater.inflate(R.layout.toplist_item_layout, parent, false);
             viewHolder = new ViewHolder();
             viewHolder.location = (TextView) view.findViewById(R.id.location);
+            // also has a position view
             viewHolder.position = (TextView) view.findViewById(R.id.position);
             viewHolder.buttonLike = (ImageButton) view.findViewById(R.id.button_like);
             viewHolder.buttonComment = (Button) view.findViewById(R.id.button_comment);
@@ -59,6 +60,7 @@ public class TopListAdapter extends FeedAdapter {
         post = posts.get(position);
         viewHolder.buttonLike.setTag(R.id.button_position_in_feed, position);
         viewHolder.buttonComment.setTag(position);
+        // set position to be the index in the list but plus one as index starts at 0
         viewHolder.position.setText(String.valueOf(position + 1));
         try {
             viewHolder.username.setText(post.getString("artist"));

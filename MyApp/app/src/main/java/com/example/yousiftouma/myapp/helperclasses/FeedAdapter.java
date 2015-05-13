@@ -1,4 +1,4 @@
-package com.example.yousiftouma.myapp.misc;
+package com.example.yousiftouma.myapp.helperclasses;
 
 import android.content.Context;
 import android.util.Log;
@@ -22,6 +22,7 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * Populates feed
+ * Has protected fields and methods as it has a subclass using them
  */
 public class FeedAdapter extends BaseAdapter {
 
@@ -33,6 +34,12 @@ public class FeedAdapter extends BaseAdapter {
     protected OnLikeButtonClickedListener fragment;
     protected User mLoggedInUser = User.getInstance();
 
+    /**
+     * Constructor for this adapter
+     * @param context the context this adapter is in (activity)
+     * @param posts the list of posts to fill the feed with
+     * @param fragment fragment this adapter is in, so we can call methods in it
+     */
     public FeedAdapter(Context context, ArrayList<JSONObject> posts,
                        OnLikeButtonClickedListener fragment) {
         super();
@@ -74,6 +81,8 @@ public class FeedAdapter extends BaseAdapter {
 
         final View view;
 
+        // if this is the first time the method is executed on this view
+        // we need to fetch the different views in the list item first
         if (convertView == null) {
             view = mInflater.inflate(R.layout.feed_item_layout, parent, false);
             viewHolder = new ViewHolder();
@@ -86,18 +95,22 @@ public class FeedAdapter extends BaseAdapter {
             viewHolder.numberOfLikes = (TextView) view.findViewById(R.id.likesView);
             viewHolder.numberOfComments = (TextView) view.findViewById(R.id.commentsView);
 
+            // tag the view with its ViewHolder so we can access the views next time
+            // and update them
             view.setTag(viewHolder);
         }
 
+        // we have access to the view and need to (re)populate it
+        // so we fetch it
         else {
             view = convertView;
             viewHolder = (ViewHolder) view.getTag();
         }
 
-        /**
-         * Gets a JSON object containing a post, gets the data
-         * from every key and sets it to the corresponding TextView
-         */
+
+         // Gets a JSON object containing a post, gets the data from every key and
+         // sets it to the corresponding TextView
+
         post = posts.get(position);
         viewHolder.buttonLike.setTag(R.id.button_position_in_feed, position);
         viewHolder.buttonComment.setTag(position);
@@ -135,6 +148,7 @@ public class FeedAdapter extends BaseAdapter {
                 mLoggedInUser.setLikes();
                 // run getView again for this particular row so it is updated
                 getView(position, view, parent);
+                // notify fragment
                 fragment.onLikeButtonClickedInAdapter();
             }
         });
@@ -159,6 +173,11 @@ public class FeedAdapter extends BaseAdapter {
         public void onCommentClickedInFeedAdapter(JSONObject post);
     }
 
+    /**
+     * notify activity that comment was clicked (need to change fragment)
+     * @param view view that was clicked (button)
+     * @param position which position was clicked so we know which post it was
+     */
     public void onCommentButtonClicked(View view, int position) {
         Context context = view.getContext();
         String TAG = "CommentButtonClicked Error";
@@ -173,6 +192,13 @@ public class FeedAdapter extends BaseAdapter {
         }
     }
 
+    /**
+     * Checks state when clicked, tries to perform the corresponding action
+     * and then update the state accordingly
+     * @param buttonStatus current state of button (like/unlike)
+     * @param pos which position in list so we know which post
+     * @param button the button clicked
+     */
     protected void doLikeOrUnlike(String buttonStatus, int pos, ImageButton button) {
         String url;
         String response = null;
@@ -191,7 +217,6 @@ public class FeedAdapter extends BaseAdapter {
         } catch (InterruptedException | ExecutionException | JSONException e) {
             e.printStackTrace();
         }
-
         switch (response) {
             case "liked":
                 button.setImageDrawable(context.getResources().getDrawable(R.mipmap.liked_50));
@@ -202,6 +227,11 @@ public class FeedAdapter extends BaseAdapter {
         }
     }
 
+    /**
+     * returns a JSON String to be sent as POST to server
+     * @param pos to get correct post
+     * @return JSON string
+     */
     protected String createJsonForLikeOrUnlike(int pos) {
         int actionUserId = mLoggedInUser.getId();
         JSONObject finishedAction = null;
@@ -225,6 +255,11 @@ public class FeedAdapter extends BaseAdapter {
         return finishedAction.toString();
     }
 
+    /**
+     * Gets number of likes for a post
+     * @param postId id of post we want to get likes for
+     * @return a string number
+     */
     protected String getNumberOfLikes(int postId) {
         String url = MainActivity.SERVER_URL + "get_number_of_likes_for_post/"
                 + postId;
@@ -242,6 +277,11 @@ public class FeedAdapter extends BaseAdapter {
         return numberOfLikes;
     }
 
+    /**
+     * similar to above but commentcount instead of likes
+     * @param postId id of post we want to get commentcount for
+     * @return a string number
+     */
     protected String getNumberOfComments(int postId) {
         String responseAsString;
         JSONObject responseAsJson;

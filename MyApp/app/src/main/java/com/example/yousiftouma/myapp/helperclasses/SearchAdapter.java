@@ -1,4 +1,4 @@
-package com.example.yousiftouma.myapp.misc;
+package com.example.yousiftouma.myapp.helperclasses;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.yousiftouma.myapp.MainActivity;
@@ -22,7 +21,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 /**
- * populates search
+ * populates search in action bar
  */
 public class SearchAdapter extends CursorAdapter {
 
@@ -40,6 +39,8 @@ public class SearchAdapter extends CursorAdapter {
         username.setText(members.get(cursor.getPosition()));
         username.setBackgroundColor(Color.BLACK);
         username.setTextColor(Color.WHITE);
+
+        // Call activity listener method if an item in search result is clicked
         username.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -60,6 +61,16 @@ public class SearchAdapter extends CursorAdapter {
         });
     }
 
+    @Override
+    public View newView(Context context, Cursor cursor, ViewGroup parent) {
+        LayoutInflater inflater = (LayoutInflater)
+                context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View view = inflater.inflate(R.layout.search_listview_members, parent, false);
+
+        username = (TextView) view.findViewById(R.id.member);
+        return view;
+    }
+
     private int getUserId(String username) {
 
         String url = MainActivity.SERVER_URL + "get_user_by_username/"
@@ -75,20 +86,9 @@ public class SearchAdapter extends CursorAdapter {
             e.printStackTrace();
             e.getMessage();
         }
+        // if we couldn't get a real ID by this point something went wrong
         assert (id != -1) : "could not get proper id";
         return id;
-    }
-
-
-
-    @Override
-    public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater)
-                context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(R.layout.search_listview_members, parent, false);
-
-        username = (TextView) view.findViewById(R.id.member);
-        return view;
     }
 
     public interface OnSearchItemClickedListener {

@@ -17,9 +17,9 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.example.yousiftouma.myapp.misc.DynamicAsyncTask;
-import com.example.yousiftouma.myapp.misc.FeedAdapter;
-import com.example.yousiftouma.myapp.misc.User;
+import com.example.yousiftouma.myapp.helperclasses.DynamicAsyncTask;
+import com.example.yousiftouma.myapp.helperclasses.FeedAdapter;
+import com.example.yousiftouma.myapp.helperclasses.User;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,16 +30,11 @@ import java.util.concurrent.ExecutionException;
 
 
 /**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link com.example.yousiftouma.myapp.UserProfileFragment.OnUserProfileFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link UserProfileFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * fragment to show the profile of a user
  */
 public class UserProfileFragment extends ListFragment implements
         FeedAdapter.OnLikeButtonClickedListener{
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    // the fragment initialization parameters
     private static final String PROFILE_USER = "profile_user";
 
     private int mProfileUserId;
@@ -48,7 +43,6 @@ public class UserProfileFragment extends ListFragment implements
     private TextView mProfileUserNameView;
     private ImageView mProfileUserImageView;
     private ProgressDialog mProgressDialog;
-    private ImageButton mFollowButton;
     private Button mRecentPosts, mMostLikedPosts;
 
     private FeedAdapter adapter;
@@ -64,7 +58,6 @@ public class UserProfileFragment extends ListFragment implements
      * @param profileUserId id of user who owns profile to be viewed
      * @return A new instance of fragment UserProfileFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static UserProfileFragment newInstance(int profileUserId) {
         UserProfileFragment fragment = new UserProfileFragment();
         Bundle args = new Bundle();
@@ -93,10 +86,16 @@ public class UserProfileFragment extends ListFragment implements
 
         mProfileUserNameView = (TextView) view.findViewById(R.id.profile_username_view);
         mProfileUserImageView = (ImageView) view.findViewById(R.id.profile_pic_view);
-        mFollowButton = (ImageButton) view.findViewById(R.id.button_follow);
+        ImageButton mFollowButton = (ImageButton) view.findViewById(R.id.button_follow);
+        ImageButton mChangeProfilePicButton = (ImageButton)
+                view.findViewById(R.id.button_take_new_profile_pic);
         mMostLikedPosts = (Button) view.findViewById(R.id.button_most_liked);
         mRecentPosts = (Button) view.findViewById(R.id.button_most_recent);
 
+        /**
+         * issue a slight delay so the click can be registered properly
+         * and the "tab" highlighted
+         */
         final android.os.Handler handler = new android.os.Handler();
         handler.postDelayed(new Runnable() {
             @Override
@@ -147,11 +146,20 @@ public class UserProfileFragment extends ListFragment implements
             }
         });
 
+        // disable follow button if own profile
+        // enable edit profile pic button
         if (mProfileUserId == mLoggedInUser.getId()) {
+            mChangeProfilePicButton.setEnabled(true);
             mFollowButton.setEnabled(false);
             mFollowButton.setImageDrawable(getResources().getDrawable(R.mipmap.cant_follow_50));
         }
+        // else leave follow enabled and check what status it should have, depending on if
+        // logged in user is following this user or not
+        // also disable edit profile pic button
         else {
+            mChangeProfilePicButton.setEnabled(false);
+            mChangeProfilePicButton.setImageDrawable(getResources().
+                    getDrawable(R.mipmap.cant_edit_pic_50));
             mFollowButton.setEnabled(true);
             if (mLoggedInUser.getFollows().contains(mProfileUserId)) {
                 mFollowButton.setTag(R.id.follow_status, "unfollow");
@@ -168,14 +176,20 @@ public class UserProfileFragment extends ListFragment implements
             public void onClick(View v) {
                 String followStatus = (String) v.getTag(R.id.follow_status);
                 doFollowOrUnfollow(followStatus, (ImageButton) v);
+                // update list of followed for this user object
                 mLoggedInUser.setFollows();
 
             }
         });
 
+
         return view;
     }
 
+    /**
+     * Gives user feedback that profile page is loading
+     * sets adapter with posts to show
+     */
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -227,7 +241,7 @@ public class UserProfileFragment extends ListFragment implements
     }
 
     /**
-     * adapter has notified us that a like was performed and we should sorth
+     * adapter has notified us that a like was performed and we should sort
      * the list again accordingly
      */
     @Override
@@ -243,6 +257,9 @@ public class UserProfileFragment extends ListFragment implements
         public void onUserProfileFeedListItemSelected(JSONObject post);
     }
 
+    /**
+     * returns a list of posts sorted by date, most recent first
+     */
     private ArrayList<JSONObject> getPostsSortedByDate() {
         String url = MainActivity.SERVER_URL + "get_posts_by_id/"
                 + mProfileUserId;
@@ -261,6 +278,9 @@ public class UserProfileFragment extends ListFragment implements
         return posts;
     }
 
+    /**
+     * returns a list of posts sorted by number of likes, most liked first
+     */
     private ArrayList<JSONObject> getPostsSortedByLikes() {
         String url = MainActivity.SERVER_URL + "get_user_posts_ordered_by_likes/"
                 + mProfileUserId;
@@ -279,6 +299,9 @@ public class UserProfileFragment extends ListFragment implements
         return posts;
     }
 
+    /**
+     * sets the various views with current profile user information
+     */
     private void setProfileDetails() {
         String url = MainActivity.SERVER_URL + "get_user_by_id/"
                 + mProfileUserId;
@@ -297,6 +320,12 @@ public class UserProfileFragment extends ListFragment implements
         }
     }
 
+    /**
+     * performs a follow or unfollow depending on the status of the button
+     * and changed the appearance and status accordingly
+     * @param buttonStatus current status of the button
+     * @param button the actual button so we can change its status and appearance
+     */
     private void doFollowOrUnfollow(String buttonStatus, ImageButton button) {
         String url;
         String response = null;
@@ -329,6 +358,10 @@ public class UserProfileFragment extends ListFragment implements
         }
     }
 
+    /**
+     * creates a json string to be sent to server as post arg
+     * @return json string
+     */
     private String createJsonForFollowOrUnfollow() {
         int FollowerUserId = mLoggedInUser.getId();
         JSONObject finishedAction = null;

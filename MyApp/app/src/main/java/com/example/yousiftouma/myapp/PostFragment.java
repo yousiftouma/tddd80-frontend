@@ -25,9 +25,9 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.yousiftouma.myapp.misc.CommentAdapter;
-import com.example.yousiftouma.myapp.misc.DynamicAsyncTask;
-import com.example.yousiftouma.myapp.misc.User;
+import com.example.yousiftouma.myapp.helperclasses.CommentAdapter;
+import com.example.yousiftouma.myapp.helperclasses.DynamicAsyncTask;
+import com.example.yousiftouma.myapp.helperclasses.User;
 
 import org.json.JSONArray;
 import org.json.JSONException;

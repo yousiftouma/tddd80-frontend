@@ -1,4 +1,4 @@
-package com.example.yousiftouma.myapp.misc;
+package com.example.yousiftouma.myapp.helperclasses;
 
 import com.example.yousiftouma.myapp.MainActivity;
 
@@ -68,6 +68,10 @@ public class User {
         follows.clear();
     }
 
+    /**
+     * get array of liked posts by this user
+     * @return the array
+     */
     private ArrayList<Integer> allLikesByUser() {
         String url = MainActivity.SERVER_URL + "get_user_likes_by_id/"
                 + id;
@@ -85,6 +89,10 @@ public class User {
         } return likes;
     }
 
+    /**
+     * get array of followed users by this user
+     * @return the array
+     */
     private ArrayList<Integer> allFollowedByUser() {
         String url = MainActivity.SERVER_URL + "get_all_followed_by_id/"
                 + id;
@@ -102,6 +110,7 @@ public class User {
         } return follows;
     }
 
+    // getters
     public int getId() {
         return id;
     }
@@ -126,11 +135,19 @@ public class User {
         return profilePic;
     }
 
+    /**
+     * updates the array of likes with the currently liked posts in the database
+     * used when you somehow update this information
+     */
     public void setLikes() {
         likes.clear();
         likes.addAll(allLikesByUser());
     }
 
+    /**
+     * updates the array of followed users with the currently followed users from the database
+     * used when you somehow update this information
+     */
     public void setFollows() {
         follows.clear();
         follows.addAll(allFollowedByUser());

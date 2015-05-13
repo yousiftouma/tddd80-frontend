@@ -1,6 +1,5 @@
-package com.example.yousiftouma.myapp.misc;
+package com.example.yousiftouma.myapp.helperclasses;
 
-import android.app.ProgressDialog;
 import android.os.AsyncTask;
 
 import org.apache.http.HttpResponse;
@@ -23,7 +22,6 @@ import java.io.InputStreamReader;
 public class DynamicAsyncTask extends AsyncTask<String, Void, String> {
 
     private String response;
-    private ProgressDialog pDialog;
     private String method;
     private String JsonString = null;
 
@@ -84,6 +82,13 @@ public class DynamicAsyncTask extends AsyncTask<String, Void, String> {
         return response;
     }
 
+    /**
+     * converts a inputStream to string by reading and appending while there is
+     * something to read
+     * @param inputStream the InputStream to read from
+     * @return string result
+     * @throws IOException
+     */
     private static String convertInputStreamToString(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         String line = "";
