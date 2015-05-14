@@ -3,7 +3,6 @@ package com.example.yousiftouma.myapp;
 import android.app.Activity;
 import android.app.ListFragment;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +13,6 @@ import android.widget.ListView;
 
 import com.example.yousiftouma.myapp.helperclasses.DynamicAsyncTask;
 import com.example.yousiftouma.myapp.helperclasses.TopListAdapter;
-import com.example.yousiftouma.myapp.helperclasses.User;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,10 +23,7 @@ import java.util.concurrent.ExecutionException;
 
 
 /**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link com.example.yousiftouma.myapp.TopListFragment.OnTopListFragmentInteraction} interface
- * to handle interaction events.
+ * Fragment that shows a top list for posts, sorted by likes
  */
 public class TopListFragment extends ListFragment implements
         TopListAdapter.OnLikeButtonClickedListener {
@@ -36,9 +31,7 @@ public class TopListFragment extends ListFragment implements
     private OnTopListFragmentInteraction mListener;
 
     private ArrayList<JSONObject> posts;
-    private ListView list;
     private BaseAdapter adapter;
-    private User mLoggedInUser;
 
     public TopListFragment() {
         // Required empty public constructor
@@ -48,28 +41,31 @@ public class TopListFragment extends ListFragment implements
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_toplist, container, false);
-        mLoggedInUser = User.getInstance();
-        return view;
+        return inflater.inflate(R.layout.fragment_toplist, container, false);
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        list = getListView();
+        // retrieve listview, set a listener to the items in it
+        ListView list = getListView();
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 onListItemClicked(position);
             }
         });
+        // init our array, init corresponding adapter and pass it the array
         posts = new ArrayList<>();
         getTopListPosts();
         adapter = new TopListAdapter(getActivity(), posts, this);
         list.setAdapter(adapter);
     }
 
+    /**
+     * notify our listener that listitem was clicked and call the handling method
+     */
     public void onListItemClicked(int position) {
         if (mListener != null) {
             mListener.onTopListItemClicked(posts.get(position));
@@ -93,6 +89,9 @@ public class TopListFragment extends ListFragment implements
         mListener = null;
     }
 
+    /**
+     * sets our array of posts to a sorted list of posts, retrieved from server
+     */
     private void getTopListPosts() {
         String url = MainActivity.SERVER_URL + "get_posts_ordered_by_likes";
         posts.clear();
@@ -109,6 +108,10 @@ public class TopListFragment extends ListFragment implements
         }
     }
 
+    /**
+     * when we receive notification from the adapter that like was clicked
+     * in the adapter, we need to respond by updating the list, as order may have changed
+     */
     @Override
     public void onLikeButtonClickedInAdapter() {
         //we update the order now since it may be different

@@ -339,7 +339,6 @@ public class UserProfileFragment extends ListFragment implements
         }
         try {
             String responseJsonString = new DynamicAsyncTask(JsonString).execute(url).get();
-            System.out.println(responseJsonString);
             JSONObject responseAsJson = new JSONObject(responseJsonString);
             response = responseAsJson.getString("result");
         } catch (InterruptedException | ExecutionException | JSONException e) {

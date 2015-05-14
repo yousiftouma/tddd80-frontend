@@ -9,7 +9,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.support.annotation.NonNull;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -21,7 +20,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,30 +37,28 @@ import java.util.concurrent.ExecutionException;
 
 
 /**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link PostFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link PostFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * Fragment to show a post, can be used in either discover mode
+ * or in standard mode, meaning it only shows a selected post
+ * Has constructor for each mode
  */
 public class PostFragment extends ListFragment {
 
     private static final String POST = "post";
     private static final String IS_COMMENT_HIGHLIGHTED = "is_comment_highlighted";
-    private static final String IS_DICOVER_MODE = "is_discover_mode";
+    private static final String IS_DISCOVER_MODE = "is_discover_mode";
 
     private boolean mIsCommentHighlighted;
     private JSONObject mPost;
     private boolean mIsDiscoverMode;
 
-    private TextView mAuthorView, mTitleView, mDescriptionView, mLikesView,
-                        mCommentsView, mSongTimeView, mLocationView;
-    private ImageButton mLikeButton, mPlayButton, mPauseButton, mFastForwardButton,
-                            mRewindButton;
-    private Button mCommentButton;
+    private TextView mAuthorView;
+    private TextView mTitleView;
+    private TextView mDescriptionView;
+    private TextView mLikesView;
+    private TextView mCommentsView;
+    private TextView mLocationView;
+    private ImageButton mLikeButton;
     private EditText mCommentField;
-    private SeekBar mSeekBar;
 
     private User mLoggedInUser = User.getInstance();
 
@@ -86,28 +82,28 @@ public class PostFragment extends ListFragment {
      * factory method for postfragment without discover mode
      * @param post post to show
      * @param isCommentHighlighted if came through comment
-     * @return new fragment
+     * @return PostFragment in standard mode
      */
     public static PostFragment newInstance(JSONObject post, boolean isCommentHighlighted) {
         PostFragment fragment = new PostFragment();
         Bundle args = new Bundle();
         args.putString(POST, post.toString());
         args.putBoolean(IS_COMMENT_HIGHLIGHTED, isCommentHighlighted);
-        args.putBoolean(IS_DICOVER_MODE, false);
+        args.putBoolean(IS_DISCOVER_MODE, false);
         fragment.setArguments(args);
         return fragment;
     }
 
     /**
      * factory method when using postfragment for discover mode
-     * @return new fragment
+     * @return PostFragment in discover mode
      */
     public static PostFragment newInstance(){
         PostFragment fragment = new PostFragment();
         Bundle args = new Bundle();
         args.putString(POST, null);
         args.putBoolean(IS_COMMENT_HIGHLIGHTED, false);
-        args.putBoolean(IS_DICOVER_MODE, true);
+        args.putBoolean(IS_DISCOVER_MODE, true);
         fragment.setArguments(args);
         return fragment;
     }
@@ -121,14 +117,16 @@ public class PostFragment extends ListFragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mIsCommentHighlighted = getArguments().getBoolean(IS_COMMENT_HIGHLIGHTED);
-            mIsDiscoverMode = getArguments().getBoolean(IS_DICOVER_MODE);
-            // only assign post if not discover mode, otherwise redundant
+            mIsDiscoverMode = getArguments().getBoolean(IS_DISCOVER_MODE);
+            // only assign post if standard mode, otherwise there is no post to assign
             if (!mIsDiscoverMode) {
                 try {
                     mPost = new JSONObject(getArguments().getString(POST));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+                // we're in discover mode and need to active shakesensor
+                // and get a random first post to display
             } else {
                 activateShakeSensor();
                 mPost = getRandomPost();
@@ -138,6 +136,7 @@ public class PostFragment extends ListFragment {
             }
         }
 
+        // init our sensormanager and assign it the accelerometer
         mSensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
         mSensorManager.registerListener(mSensorListener,
                 mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
@@ -158,6 +157,8 @@ public class PostFragment extends ListFragment {
                 mAccelCurrent = (float) Math.sqrt((double) (x*x + y*y + z*z));
                 float delta = mAccelCurrent - mAccelLast;
                 mAccel = mAccel * 0.9f + delta; // perform low-cut filter
+                // this if means we have discovered a shake
+                // also make sure we are in discover mode just in case
                 if (mAccel > 6 && mIsDiscoverMode) {
                     Toast.makeText(getActivity().getApplicationContext(), getResources().
                                     getString(R.string.new_post_retrieved),
@@ -188,18 +189,12 @@ public class PostFragment extends ListFragment {
         mDescriptionView = (TextView) view.findViewById(R.id.description);
         mLikesView = (TextView) view.findViewById(R.id.likesView);
         mCommentsView = (TextView) view.findViewById(R.id.commentsView);
-        mSongTimeView = (TextView) view.findViewById(R.id.songtimeView);
         mLocationView = (TextView) view.findViewById(R.id.location);
 
         mLikeButton = (ImageButton) view.findViewById(R.id.button_like);
-        mRewindButton = (ImageButton) view.findViewById(R.id.button_rewind);
-        mPlayButton = (ImageButton) view.findViewById(R.id.button_play);
-        mPauseButton = (ImageButton) view.findViewById(R.id.button_pause);
-        mFastForwardButton = (ImageButton) view.findViewById(R.id.button_fastforward);
+        ImageButton mPlayButton = (ImageButton) view.findViewById(R.id.button_play);
 
-        mCommentButton = (Button) view.findViewById(R.id.button_comment);
-
-        mSeekBar = (SeekBar) view.findViewById(R.id.seekBar);
+        Button mCommentButton = (Button) view.findViewById(R.id.button_comment);
 
         mCommentField = (EditText) view.findViewById(R.id.comment_edittext);
 
@@ -223,6 +218,10 @@ public class PostFragment extends ListFragment {
             mPlayButton.requestFocus();
         }
 
+
+         // if we press like, perform like or unlike of this post depending on
+         // the buttons current status
+         // update the users likes
         mLikeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -232,6 +231,8 @@ public class PostFragment extends ListFragment {
                 mLoggedInUser.setLikes();
             }
         });
+
+        // displays keyboard and switches to comment field if comment button is pressed
         mCommentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -242,13 +243,15 @@ public class PostFragment extends ListFragment {
             }
         });
 
+        // when keyboard is activate in comment field and we try to press done
+        // we get the text (if it isn't empty, including only spaces) and perform
+        // the post, also resetting the field
         mCommentField.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 String comment = mCommentField.getText().toString();
                 if ((actionId == EditorInfo.IME_NULL || actionId == EditorInfo.IME_ACTION_DONE)
                         && !comment.trim().isEmpty()){
-                    System.out.println("pressed done");
                     mCommentField.setText("");
                     postComment(comment);
                     return false;
@@ -261,6 +264,7 @@ public class PostFragment extends ListFragment {
             }
         });
 
+        // if we change focus, hide keyboard
         mCommentField.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -272,6 +276,7 @@ public class PostFragment extends ListFragment {
             }
         });
 
+        // simulate click feedback on username
         mAuthorView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -318,7 +323,7 @@ public class PostFragment extends ListFragment {
         super.onActivityCreated(savedInstanceState);
         ListView listView = getListView();
         //we create one object for comments and fill it with all comments
-        //from getComments(). Then we use manipulate using this pointer.
+        //from getComments(). Then we manipulate using this pointer.
         //This means notifyDataSetChanged() works when the array is updated
         comments = new ArrayList<>();
         comments.addAll(getComments());
@@ -326,6 +331,10 @@ public class PostFragment extends ListFragment {
         listView.setAdapter(adapter);
     }
 
+    /**
+     * notify activity to change to the users profile
+     * @param userId id of user pressed
+     */
     public void onUsernamePressed(int userId) {
         if (mListener != null) {
             mListener.onPostFragmentUsernameButtonClicked(userId);
@@ -352,12 +361,14 @@ public class PostFragment extends ListFragment {
     @Override
     public void onResume() {
         super.onResume();
+        // reactivate sensor
         mSensorManager.registerListener(mSensorListener, mSensorManager.
                 getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
     public void onPause() {
+        // deactivate sensor
         mSensorManager.unregisterListener(mSensorListener);
         super.onPause();
     }
@@ -372,6 +383,7 @@ public class PostFragment extends ListFragment {
             e.printStackTrace();
         }
         comments = new ArrayList<>();
+        // else something went wrong and we can't get comments
         if (postId != -1) {
             url = MainActivity.SERVER_URL + "get_comments_for_post_by_id/" +
                     postId;
@@ -400,18 +412,14 @@ public class PostFragment extends ListFragment {
         try {
             // do post
             String responseJsonString = new DynamicAsyncTask(JsonString).execute(url).get();
-            System.out.println("server response: " + responseJsonString);
             JSONObject responseAsJson = new JSONObject(responseJsonString);
-            System.out.println("jsonresponse: " + responseAsJson);
             response = responseAsJson.getString("result");
-            System.out.println("response (ok): " + response);
 
         } catch (InterruptedException | ExecutionException | JSONException e) {
             e.printStackTrace();
         }
         switch (response) {
             case "ok":
-                System.out.println("comment made!");
                 //repopulate the list with new comment included and notify
                 //adapter of updated list. Also update comment count
                 comments.clear();
@@ -435,19 +443,16 @@ public class PostFragment extends ListFragment {
         String JsonString = createJsonForLikeOrUnlike();
 
         if (buttonStatus.equals("like") ) {
-            System.out.println("like?: " + buttonStatus);
             url = MainActivity.SERVER_URL + "like/";
             mLikeButton.setTag(R.id.like_status, "unlike");
         }
         else { // It says unlike and we do that
-            System.out.println("unlike?: " + buttonStatus);
             url = MainActivity.SERVER_URL + "unlike/";
             mLikeButton.setTag(R.id.like_status, "like");
         }
         try {
             // do post
             String responseJsonString = new DynamicAsyncTask(JsonString).execute(url).get();
-            System.out.println("responsejsonstring: " + responseJsonString);
             JSONObject responseAsJson = new JSONObject(responseJsonString);
             response = responseAsJson.getString("result");
         } catch (InterruptedException | ExecutionException | JSONException e) {
@@ -511,6 +516,9 @@ public class PostFragment extends ListFragment {
         return finishedAction.toString();
     }
 
+    /**
+     * sets the like count for this post
+     */
     private void setNumberOfLikes() {
         String responseAsString;
         JSONObject responseAsJson;
@@ -529,6 +537,9 @@ public class PostFragment extends ListFragment {
         mLikesView.setText(numberOfLikes);
     }
 
+    /**
+     * sets comment count for this post
+     */
     private void setNumberOfComments() {
         String responseAsString;
         JSONObject responseAsJson;
@@ -563,6 +574,9 @@ public class PostFragment extends ListFragment {
             index = rand.nextInt(jsonArray.length());
             post = jsonArray.getJSONObject(index);
             curr_post_id = post.getInt("id");
+
+            // try to get a new random post until we get one that isn't
+            // the previous one
             while (curr_post_id == latestShownPost) {
                 index = rand.nextInt(jsonArray.length());
                 post = jsonArray.getJSONObject(index);
@@ -571,8 +585,8 @@ public class PostFragment extends ListFragment {
 
             latestShownPost = curr_post_id;
 
-              // add all posts that we can see in discover mode in a list
-              // and remove the one we are showing
+             // add all posts that we can see in discover mode in a list
+             // and remove the one we are showing
             postsNotSeenYet = new ArrayList<>();
             for (int i = 0; i < jsonArray.length(); i++) {
                 if (i != index) {
@@ -589,6 +603,7 @@ public class PostFragment extends ListFragment {
     private JSONObject showRandomPost() {
         Random rand = new Random();
         JSONObject post;
+        // if there is a post we haven't seen yet, try to get one from that list
         if (!postsNotSeenYet.isEmpty()){
             int index = rand.nextInt(postsNotSeenYet.size());
             post = postsNotSeenYet.get(index);
@@ -598,6 +613,7 @@ public class PostFragment extends ListFragment {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+            // else we start anew
         } else {
             return getRandomPost();
         }

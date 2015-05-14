@@ -3,7 +3,6 @@ package com.example.yousiftouma.myapp;
 import android.app.Activity;
 import android.app.ListFragment;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,17 +24,14 @@ import java.util.concurrent.ExecutionException;
 
 
 /**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link FeedFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
+ * Shows the relevant feed for the logged in user
+ * i.e. posts by you and people you follow
  */
 public class FeedFragment extends ListFragment implements FeedAdapter.OnLikeButtonClickedListener{
 
     private ArrayList<JSONObject> posts;
     private User mLoggedInUser;
     private OnFragmentInteractionListener mListener;
-    private Button mNewPostButton;
 
     public FeedFragment() {
         // Required empty public constructor
@@ -52,7 +48,7 @@ public class FeedFragment extends ListFragment implements FeedAdapter.OnLikeButt
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_feed, container, false);
-        mNewPostButton = (Button) view.findViewById(R.id.button_post);
+        Button mNewPostButton = (Button) view.findViewById(R.id.button_post);
         mNewPostButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -66,6 +62,7 @@ public class FeedFragment extends ListFragment implements FeedAdapter.OnLikeButt
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        // retrieve the listview and set item listener
         ListView list = getListView();
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -74,17 +71,27 @@ public class FeedFragment extends ListFragment implements FeedAdapter.OnLikeButt
             }
         });
 
+        // we get the array that should be in the feed and pass it to the adapter, which we set
+        // to the list
         ArrayList<JSONObject> posts = getPosts();
         FeedAdapter adapter = new FeedAdapter(getActivity(), posts, this);
         list.setAdapter(adapter);
     }
 
+    /**
+     * if a list item is clicked, we notify our listener activity so it can do what it needs to do
+     * which is change fragment to the postfragment for that post
+     * @param position position in the feed, mapping to a post in the array
+     */
     public void onListItemClicked(int position) {
         if (mListener != null) {
             mListener.onFeedFragmentItemClicked(posts.get(position));
         }
     }
 
+    /**
+     * if post button is clicked, we notify the activity so it can change fragments
+     */
     public void onPostButtonClicked() {
         if (mListener != null) {
             mListener.onNewPostButtonClicked();
@@ -108,6 +115,7 @@ public class FeedFragment extends ListFragment implements FeedAdapter.OnLikeButt
         mListener = null;
     }
 
+    // gets the relevant feed posts for this logged in user
     private ArrayList<JSONObject> getPosts() {
         String url = MainActivity.SERVER_URL + "get_feed_posts_by_id/"
                 + mLoggedInUser.getId();
@@ -126,20 +134,17 @@ public class FeedFragment extends ListFragment implements FeedAdapter.OnLikeButt
         return posts;
     }
 
+    /**
+     * this fragment doesn't need to handle this interface method since it doesn't
+     * change when something is liked, that is handled in the adapter itself
+     */
     @Override
     public void onLikeButtonClickedInAdapter() {
-        // no need to do anything as feed already updates what is necessary to update
     }
 
+
     /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
+     * any activity that uses this fragment needs to handle both these events
      */
     public interface OnFragmentInteractionListener {
         public void onFeedFragmentItemClicked(JSONObject post);

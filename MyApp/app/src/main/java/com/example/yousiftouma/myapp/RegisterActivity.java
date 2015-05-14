@@ -110,7 +110,6 @@ public class RegisterActivity extends Activity implements LoaderManager.LoaderCa
 
             // register the new account here.
             String responseString = POST(mUsername, mPassword, mEmail);
-            System.out.println(responseString);
             try {
                 jsonResponse = new JSONObject(responseString);
             } catch (JSONException e) {
@@ -196,8 +195,6 @@ public class RegisterActivity extends Activity implements LoaderManager.LoaderCa
 
             JSONObject finishedUser = new JSONObject();
             finishedUser.put("user", jsonArray);
-
-            System.out.println(finishedUser);
 
             String json = finishedUser.toString();
 

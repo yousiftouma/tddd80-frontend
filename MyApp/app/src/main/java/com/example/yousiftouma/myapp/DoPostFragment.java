@@ -26,10 +26,12 @@ import org.json.JSONObject;
 
 import java.util.concurrent.ExecutionException;
 
+/**
+ * Fragment where you upload a post
+ */
 public class DoPostFragment extends Fragment {
 
     private User mLoggedInUser;
-    private Button mDoPostButton;
     private EditText mDescriptionView;
     private EditText mTitleView;
     private String title;
@@ -54,11 +56,14 @@ public class DoPostFragment extends Fragment {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_do_post, container, false);
 
-        mDoPostButton = (Button) view.findViewById(R.id.button_do_post);
+        Button mDoPostButton = (Button) view.findViewById(R.id.button_do_post);
         mDescriptionView = (EditText) view.findViewById(R.id.description);
         mTitleView = (EditText) view.findViewById(R.id.title);
         mTitleView.requestFocus();
 
+        // listener for when clicking post, shows some user feedback and retrieves
+        // location from the gps intent in mainactivity. Assigns the necessary
+        // fields to correct data and then tries to add the post
         mDoPostButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -79,6 +84,7 @@ public class DoPostFragment extends Fragment {
             }
         });
 
+        // used to switch between edittexts when pressing next on soft keyboard
         mTitleView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -89,6 +95,7 @@ public class DoPostFragment extends Fragment {
             }
         });
 
+        // used to perform post when pressing done on soft keyboard
         mDescriptionView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -119,6 +126,8 @@ public class DoPostFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        // we start retrieving address asap so we dont risk it being null
+        // when trying to fetch it from the activity
         startGettingAddress();
     }
 
@@ -151,6 +160,10 @@ public class DoPostFragment extends Fragment {
         inputMethodManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
     }
 
+    /**
+     * Makes sure all fields are correctly entered and tries to perform post
+     * handles errors if something was unexpected along the way
+     */
     private void addNewPost() {
         View focusView = null;
         Boolean cancel = false;
@@ -174,7 +187,6 @@ public class DoPostFragment extends Fragment {
             JSONObject responseAsJson;
             try {
                 responseAsString = new DynamicAsyncTask(jsonPostString).execute(url).get();
-                System.out.println("response= " + responseAsString);
                 responseAsJson = new JSONObject(responseAsString);
                 responseAsString = responseAsJson.getString("result");
             } catch (InterruptedException | ExecutionException | JSONException e) {
@@ -192,6 +204,10 @@ public class DoPostFragment extends Fragment {
         }
     }
 
+    /**
+     * creates a json string that we can send to the server as post arg
+     * @return json string
+     */
     private String createJsonForPost() {
         int user_id = mLoggedInUser.getId();
         JSONObject finishedPost = null;
@@ -215,7 +231,6 @@ public class DoPostFragment extends Fragment {
             e.printStackTrace();
         }
         assert finishedPost != null : "jsonobject for post is null, got jsonexception";
-        System.out.println("post= " + finishedPost.toString());
         return finishedPost.toString();
     }
 
