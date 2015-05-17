@@ -21,7 +21,8 @@
             android:layout_weight="0.6"
             android:orientation="vertical"
             android:layout_width="0dp"
-            android:layout_height="fill_parent">
+            android:layout_height="fill_parent"
+            android:divider="@drawable/feed_button_divider">
 
             <TextView
                 android:id="@+id/profile_username_view"
@@ -63,6 +64,12 @@
                     android:textStyle="bold"
                     android:textColor="#ff557cff" />
             </LinearLayout>
+
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="1px"
+                android:background="@drawable/feed_button_divider"
+                android:layout_marginTop="3dp"></View>
 
             <LinearLayout
                 android:orientation="horizontal"

@@ -33,6 +33,7 @@
         android:layout_height="3dp"
         android:layout_alignBottom="@+id/button_post"
         android:layout_above="@android:id/list"
-        android:background="@drawable/listview_item_divider" />
+        android:background="@drawable/listview_item_divider"
+        android:id="@+id/view" />
 
 </RelativeLayout>

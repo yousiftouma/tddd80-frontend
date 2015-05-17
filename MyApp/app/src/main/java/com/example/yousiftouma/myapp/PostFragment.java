@@ -297,7 +297,17 @@ public class PostFragment extends ListFragment {
             mAuthorView.setText(mPost.getString("artist"));
             mTitleView.setText(mPost.getString("title"));
             mDescriptionView.setText(mPost.getString("description"));
-            mLocationView.setText("Uploaded from " + mPost.getString("location"));
+
+            if (mPost.getString("location").equals("null") |
+                    mPost.getString("location").equals("No Location Data Provided") |
+                    mPost.getString("location").equals("")
+                    )
+            {
+                mLocationView.setText("Uploaded from Unknown Location");
+            }
+            else {
+                mLocationView.setText("Uploaded from " + mPost.getString("location"));
+            }
 
             // check if post is liked, to know what button to display
             if (mLoggedInUser.getLikes().contains(mPost.getInt("id"))){
@@ -382,9 +392,8 @@ public class PostFragment extends ListFragment {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        comments = new ArrayList<>();
-        // else something went wrong and we can't get comments
-        if (postId != -1) {
+        ArrayList <JSONObject> comments = new ArrayList<>();
+        if (postId != -1) { // else something went wrong and we can't get comments
             url = MainActivity.SERVER_URL + "get_comments_for_post_by_id/" +
                     postId;
             String responseAsString;

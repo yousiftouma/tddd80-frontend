@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.ListFragment;
 import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -90,6 +89,7 @@ public class UserProfileFragment extends ListFragment implements
         ImageButton mFollowButton = (ImageButton) view.findViewById(R.id.button_follow);
         ImageButton mChangeProfilePicButton = (ImageButton)
                 view.findViewById(R.id.button_take_new_profile_pic);
+        Button mFollowersButton = (Button) view.findViewById(R.id.button_followers);
         mMostLikedPosts = (Button) view.findViewById(R.id.button_most_liked);
         Button mLikedPostsByUser = (Button) view.findViewById(R.id.button_likes);
         mRecentPosts = (Button) view.findViewById(R.id.button_most_recent);
@@ -151,6 +151,12 @@ public class UserProfileFragment extends ListFragment implements
             @Override
             public void onClick(View v) {
                 onLikesButtonClicked();
+            }
+        });
+        mFollowersButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onFollowersButtonClicked();
             }
         });
 
@@ -237,6 +243,12 @@ public class UserProfileFragment extends ListFragment implements
         }
     }
 
+    public void onFollowersButtonClicked() {
+        if (mListener != null) {
+            mListener.onUserFollowersButtonClicked(mProfileUserId);
+        }
+    }
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -270,6 +282,7 @@ public class UserProfileFragment extends ListFragment implements
     public interface OnUserProfileFragmentInteractionListener {
         public void onUserProfileFeedListItemSelected(JSONObject post);
         public void onUserLikesButtonClicked(int userId);
+        public void onUserFollowersButtonClicked(int userId);
     }
 
     /**

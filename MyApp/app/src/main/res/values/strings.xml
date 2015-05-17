@@ -11,7 +11,7 @@
     <string name="description_holder">Description</string>
 
     <string name="button_follow">Follow</string>
-    <string name="button_followers">Followers</string>
+    <string name="button_followers">Followers/Following</string>
     <string name="button_likes">Liked posts</string>
     <string name="button_take_profile_pic">Take new profile picture</string>
     <string name="button_like">Like</string>
@@ -49,8 +49,10 @@
     <string name="new_post_retrieved">Check this post out!</string>
     <string name="shake_for_post">Shake to get a new song!</string>
 
-<!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="action_my_liked_posts">Songs I\'ve Liked</string>
+    <string name="init_followers_count">Followers: 0</string>
+    <string name="followers">Followers</string>
+    <string name="following">Following</string>
 
 </resources>

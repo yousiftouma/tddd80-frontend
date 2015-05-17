@@ -55,6 +55,7 @@ public class MainActivity extends ActionBarActivity implements
         TopListFragment.OnTopListFragmentInteraction,
         DoPostFragment.OnPostFragmentInteractionListener,
         LikedPostsFragment.OnFragmentInteractionListener,
+        FollowersFragment.OnFragmentInteractionListener,
         SearchView.OnQueryTextListener,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
@@ -395,6 +396,18 @@ public class MainActivity extends ActionBarActivity implements
     @Override
     public void onUserLikesButtonClicked(int userId) {
         newFragment = LikedPostsFragment.newInstance(userId);
+        replaceFragment();
+    }
+
+    @Override
+    public void onUserFollowersButtonClicked(int userId) {
+        newFragment = FollowersFragment.newInstance(userId);
+        replaceFragment();
+    }
+
+    @Override
+    public void onUserClicked(int userId) {
+        newFragment = UserProfileFragment.newInstance(userId);
         replaceFragment();
     }
 

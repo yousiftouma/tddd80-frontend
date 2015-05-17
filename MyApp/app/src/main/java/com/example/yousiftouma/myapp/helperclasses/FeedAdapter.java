@@ -121,7 +121,16 @@ public class FeedAdapter extends BaseAdapter {
             viewHolder.description.setText(post.getString("description"));
             viewHolder.numberOfLikes.setText(getNumberOfLikes(post.getInt("id")));
             viewHolder.numberOfComments.setText(getNumberOfComments(post.getInt("id")));
-            viewHolder.location.setText("Uploaded from " + post.getString("location"));
+            if (post.getString("location").equals("null") |
+                    post.getString("location").equals("No Location Data Provided") |
+                    post.getString("location").equals("")
+                    )
+            {
+                viewHolder.location.setText("Uploaded from Unknown Location");
+            }
+            else {
+                viewHolder.location.setText("Uploaded from " + post.getString("location"));
+            }
             // if post is already liked
             if (mLoggedInUser.getLikes().contains(post.getInt("id"))){
                 viewHolder.buttonLike.setImageDrawable(context.getResources()
