@@ -43,7 +43,8 @@ public class UserProfileFragment extends ListFragment implements
     private TextView mProfileUserNameView;
     private ImageView mProfileUserImageView;
     private ProgressDialog mProgressDialog;
-    private Button mRecentPosts, mMostLikedPosts;
+    private Button mRecentPosts;
+    private Button mMostLikedPosts;
 
     private FeedAdapter adapter;
 
@@ -90,6 +91,7 @@ public class UserProfileFragment extends ListFragment implements
         ImageButton mChangeProfilePicButton = (ImageButton)
                 view.findViewById(R.id.button_take_new_profile_pic);
         mMostLikedPosts = (Button) view.findViewById(R.id.button_most_liked);
+        Button mLikedPostsByUser = (Button) view.findViewById(R.id.button_likes);
         mRecentPosts = (Button) view.findViewById(R.id.button_most_recent);
 
         /**
@@ -143,6 +145,12 @@ public class UserProfileFragment extends ListFragment implements
                     posts.addAll(getPostsSortedByDate());
                 }
                 adapter.notifyDataSetChanged();
+            }
+        });
+        mLikedPostsByUser.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onLikesButtonClicked();
             }
         });
 
@@ -223,6 +231,12 @@ public class UserProfileFragment extends ListFragment implements
         }
     }
 
+    public void onLikesButtonClicked(){
+        if (mListener != null) {
+            mListener.onUserLikesButtonClicked(mProfileUserId);
+        }
+    }
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -255,6 +269,7 @@ public class UserProfileFragment extends ListFragment implements
 
     public interface OnUserProfileFragmentInteractionListener {
         public void onUserProfileFeedListItemSelected(JSONObject post);
+        public void onUserLikesButtonClicked(int userId);
     }
 
     /**

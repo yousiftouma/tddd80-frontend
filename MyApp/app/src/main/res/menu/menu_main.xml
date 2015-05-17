@@ -26,6 +26,11 @@
         android:orderInCategory="100"
         android:title="@string/action_top_list"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_my_liked_posts"
+        android:orderInCategory="100"
+        android:title="@string/action_my_liked_posts"
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/action_discover"

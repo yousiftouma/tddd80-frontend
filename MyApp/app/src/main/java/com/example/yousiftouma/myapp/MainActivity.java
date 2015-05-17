@@ -48,11 +48,13 @@ import java.util.concurrent.ExecutionException;
 public class MainActivity extends ActionBarActivity implements
         UserProfileFragment.OnUserProfileFragmentInteractionListener,
         FeedAdapter.OnCommentButtonClickedListener,
+        FeedAdapter.OnUsernameClickedListener,
         PostFragment.OnFragmentInteractionListener,
         FeedFragment.OnFragmentInteractionListener,
         SearchAdapter.OnSearchItemClickedListener,
         TopListFragment.OnTopListFragmentInteraction,
         DoPostFragment.OnPostFragmentInteractionListener,
+        LikedPostsFragment.OnFragmentInteractionListener,
         SearchView.OnQueryTextListener,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
@@ -335,6 +337,9 @@ public class MainActivity extends ActionBarActivity implements
                 fm.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 logOutUser();
                 break;
+            case R.id.action_my_liked_posts:
+                newFragment = LikedPostsFragment.newInstance(mLoggedInUser.getId());
+                replaceFragment();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -361,19 +366,19 @@ public class MainActivity extends ActionBarActivity implements
         String url = SERVER_URL + "get_users";
         String responseAsString;
         JSONObject responseAsJson;
-        ArrayList<String> usernames = new ArrayList<>();
+        ArrayList<String> userNames = new ArrayList<>();
         try {
             responseAsString = new DynamicAsyncTask().execute(url).get();
             responseAsJson = new JSONObject(responseAsString);
             JSONArray jsonArray = responseAsJson.getJSONArray("users");
             for (int i = 0; i < jsonArray.length(); i++) {
-                usernames.add(jsonArray.getJSONObject(i).getString("username"));
+                userNames.add(jsonArray.getJSONObject(i).getString("username"));
             }
         } catch (InterruptedException | JSONException | ExecutionException e) {
             e.printStackTrace();
             e.getMessage();
         }
-        return usernames;
+        return userNames;
     }
 
     /**
@@ -386,6 +391,12 @@ public class MainActivity extends ActionBarActivity implements
     }
 
     // Methods below are listener methods for the implemented interfaces
+
+    @Override
+    public void onUserLikesButtonClicked(int userId) {
+        newFragment = LikedPostsFragment.newInstance(userId);
+        replaceFragment();
+    }
 
     @Override
     public void onUserProfileFeedListItemSelected(JSONObject post) {
@@ -406,7 +417,19 @@ public class MainActivity extends ActionBarActivity implements
     }
 
     @Override
+    public void onUsernameClickedInAdapter(int userId) {
+        newFragment = UserProfileFragment.newInstance(userId);
+        replaceFragment();
+    }
+
+    @Override
     public void onFeedFragmentItemClicked(JSONObject post) {
+        newFragment = PostFragment.newInstance(post, false);
+        replaceFragment();
+    }
+
+    @Override
+    public void onPostClickedInLikedPostsFragment(JSONObject post) {
         newFragment = PostFragment.newInstance(post, false);
         replaceFragment();
     }

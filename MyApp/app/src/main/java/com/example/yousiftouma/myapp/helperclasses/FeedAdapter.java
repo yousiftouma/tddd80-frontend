@@ -1,6 +1,7 @@
 package com.example.yousiftouma.myapp.helperclasses;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -162,7 +163,40 @@ public class FeedAdapter extends BaseAdapter {
             }
         });
 
+        viewHolder.username.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                v.setBackgroundColor(Color.LTGRAY);
+                try {
+                    onUsernamePressed(v, post.getInt("user_id"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
         return view;
+    }
+
+    /**
+     * notify activity to change to the users profile
+     * @param userId id of user pressed
+     */
+    public void onUsernamePressed(View view, int userId) {
+        Context context = view.getContext();
+        String TAG = "Username clicked Error";
+
+        if (context instanceof OnUsernameClickedListener) {
+            ((OnUsernameClickedListener) context).onUsernameClickedInAdapter(userId);
+        }
+        else {
+            Log.w(TAG, "Activity should implement OnUsernameClickedListener: "
+                    + context.getClass().getName());
+        }
+    }
+
+    public interface OnUsernameClickedListener {
+        public void onUsernameClickedInAdapter(int userId);
     }
 
     public interface OnLikeButtonClickedListener {

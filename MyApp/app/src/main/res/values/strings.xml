@@ -49,4 +49,8 @@
     <string name="new_post_retrieved">Check this post out!</string>
     <string name="shake_for_post">Shake to get a new song!</string>
 
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="action_my_liked_posts">Songs I\'ve Liked</string>
+
 </resources>
