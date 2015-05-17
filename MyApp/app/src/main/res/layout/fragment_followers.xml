@@ -1,0 +1,63 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.yousiftouma.myapp.FollowersFragment"
+    android:orientation="vertical">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:showDividers="middle"
+            android:divider="@drawable/feed_button_divider"
+            style="?android:attr/buttonBarStyle">
+
+            <Button
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:text="@string/followers"
+                android:id="@+id/button_toggle_followers"
+                android:layout_weight="0.5"
+                android:textSize="26sp" />
+
+            <Button
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:text="@string/following"
+                android:id="@+id/button_toggle_following"
+                android:layout_weight="0.5"
+                android:textSize="26sp" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="3dp"
+            android:background="@drawable/listview_item_divider"
+            android:id="@+id/view2" />
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/init_followers_count"
+            android:id="@+id/numberOfFollowersView"
+            android:textSize="24sp"
+            android:gravity="center" />
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="3dp"
+            android:background="@drawable/listview_item_divider"
+            android:id="@+id/view" />
+
+        <ListView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:id="@android:id/list"
+            android:headerDividersEnabled="false"
+            android:footerDividersEnabled="false"
+            android:divider="@drawable/listview_item_divider"
+            android:dividerHeight="1px"/>
+
+    </LinearLayout>
