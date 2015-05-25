@@ -28,7 +28,7 @@
     <string name="title_hint">Title</string>
     <string name="description_hint">Describe your song!</string>
     <string name="add_post">Done!</string>
-    <string name="search">Find user</string>
+    <string name="search">Find User</string>
     <string name="action_top_list">Most Liked Posts</string>
 
     <string name="service_not_available">Service Not Available</string>

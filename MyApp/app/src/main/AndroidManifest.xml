@@ -15,9 +15,10 @@
     <!-- CHANGE ICON TO ACTUAL ICON -->
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/icon_100"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme"
+        >
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
@@ -37,7 +38,6 @@
         </activity>
         <activity
             android:name=".LoginActivity"
-            android:label="@string/title_activity_login"
             android:windowSoftInputMode="adjustResize|stateVisible" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -46,8 +46,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".RegisterActivity"
-            android:label="@string/title_activity_register" >
+            android:name=".RegisterActivity" >
         </activity>
 
         <meta-data android:name="com.google.android.gms.version"
